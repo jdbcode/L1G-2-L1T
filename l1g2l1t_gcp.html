@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lan="en">
+	<head>
+		<title>L1G2L1T GCP</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+		<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+		<script src="jquery.zoom.min.js"></script>
+		<script src="imgs.js"></script>
+        <script src="imgInfo.js"></script>
+		<style>
+			#imgContainer{
+				margin:50px 0px 0px 20px
+			}
+			.imgholder{
+				display:inline-block;
+			}
+
+			td{border: 1px solid black;}
+			
+			table{
+				position:absolute;
+				pointer-events: none;
+				border-collapse: collapse;
+				border-spacing: 0;
+			}
+			.svgDiv{
+				position:absolute;
+				pointer-events: none;
+				z-index: 10;
+			}
+			circle{
+				z-index: 12;
+			}
+
+		</style>
+				
+	</head>
+
+	<body>
+		<div id="imgContainer">
+			<div id="refImgDiv" class="imgholder"></div>
+			<div id="fixImgDiv" class="imgholder"></div>
+
+		</div>
+		<table id="refImgGrid">
+			<tr>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+			</tr>
+			<tr>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+			</tr>
+			<tr>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+			</tr>
+			<tr>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+			</tr>
+		</table>
+		<table id="fixImgGrid">
+			<tr>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+			</tr>
+			<tr>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+			</tr>
+			<tr>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+			</tr>
+			<tr>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+			</tr>
+		</table>
+		<div id="refSvgDiv" class="svgDiv">
+			<svg id="refSvg"></svg>
+		</div>
+		<div id="fixSvgDiv" class="svgDiv">
+			<svg id="fixSvg"></svg>
+		</div>	
+		<script>
+						
+			function setPosition(refDiv, setObj, type){
+				var obj = $('#'+refDiv)
+				var refHeight = obj[0].getBoundingClientRect().height;
+				var refWidth = obj[0].getBoundingClientRect().width;
+				var refOffset = obj.offset()
+				if(type == "table"){
+					$('#'+setObj).height(refHeight-1).width(refWidth-1).css({"top":refOffset.top,"left":refOffset.left});
+				} else if(type == "div"){
+					$('#'+setObj).height(refHeight).width(refWidth).css({"top":refOffset.top,"left":refOffset.left});
+					if (setObj.indexOf("ref") >= 0){$("#refSvg").attr({"height":refHeight, "width":refWidth})} else
+					if (setObj.indexOf("fix") >= 0){$("#fixSvg").attr({"height":refHeight, "width":refWidth})}
+				}
+				
+			}
+			
+			$(window).load(function(){
+				alert(info.refInfo.imgFile)
+				$("#refImgDiv").append(
+					'<img class="zoomImg" src='+info.refInfo.imgFile+' width=600px height=auto>'	//		
+				).zoom({url: info.refInfo.imgFile, magnify: 1.5}); //refimg
+				
+				$("#fixImgDiv").append(
+					'<img class="zoomImg" src='+info.fixInfo.imgFile[0]+' width=600px height=auto>'				
+				).zoom({url: info.fixInfo.imgFile[0], magnify: 1.5}); //fiximgs[0]
+				
+				setPosition("refImgDiv", "refImgGrid", "table")
+				setPosition("fixImgDiv", "fixImgGrid", "table")
+				setPosition("refImgDiv", "refSvgDiv", "div")
+				setPosition("fixImgDiv", "fixSvgDiv", "div")				
+			})
+			
+			function makeSVG(tag, attrs) {
+				var el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+				for (var k in attrs)
+					el.setAttribute(k, attrs[k]);
+				return el;
+			}
+			
+			function appendCircle(el, e){
+				//var parentOffset = el.parent().offset();
+				var parentOffset = el.offset();
+				var relX = e.pageX - parentOffset.left;
+				var relY = e.pageY - parentOffset.top;
+				var circle = makeSVG("circle", {cx:relX, cy:relY, r:5, fill:"red"});
+				console.log(el.context.id)
+				if (el.context.id.indexOf("ref") >= 0){svgEl = "refSvg"} else 
+				if (el.context.id.indexOf("fix") >= 0){svgEl = "fixSvg"}
+				console.log(svgEl)
+				document.getElementById(svgEl).appendChild(circle);
+			}
+			
+			$(".imgholder").click(function(e){
+				appendCircle($(this), e)
+			});
+			
+			$("#fixImgDiv").click(function(e){
+				var parentOffset = $(this).parent().offset(); 
+				var relX = e.pageX - parentOffset.left;
+				var relY = e.pageY - parentOffset.top;
+				var circle = makeSVG("circle", {cx:relX, cy:relY, r:5, fill:"red"});
+				document.getElementById("refSvg").appendChild(circle);
+			});
+			
+			//function createInfoObj(){
+			//var obj = {ref:{file:"",point:[]},fix:{file:"",point:[]}}
+			
+			//var info = [];
+			//	fiximgs.forEach(e){
+			//		obj.ref.file = e.
+				
+			//	}
+			
+			
+			//}
+			
+			
+		</script>
+	
+	</body>
+</html>
