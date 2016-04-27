@@ -4,6 +4,13 @@ library(raster)
 library(rgdal)
 library(gdalUtils)
 
+################################################################################################################
+################################################################################################################
+################################################################################################################
+####TESTING####
+################################################################################################################
+################################################################################################################
+################################################################################################################
 
 infile = "J:/l1g_warp/LM50450301985132AAA04/LM50450301985132AAA04_B4.TIF"
 outfile = "J:/l1g_warp/LM50450301985132AAA04/LM50450301985132AAA04_B4_temp1.tif"
@@ -29,9 +36,7 @@ outfile1 = "J:/l1g_warp/LM50450301985132AAA04/LM50450301985132AAA04_B4_temp2.tif
 cmd = paste("gdal_translate -of GTiff",outfile, outfile1)
 shell(cmd)
 
-################################################################################################################
-################################################################################################################
-################################################################################################################
+
 
 
 proj = projection(raster(infile))
@@ -64,14 +69,20 @@ tempname = sub("archv", "temp", fixfile) #"K:/scenes/034032/images/1976/LM103603
 gdaltrans_cmd = paste("gdal_translate -of Gtiff -ot Byte -co INTERLEAVE=BAND -a_srs", wktfile, fixfile, tempname, gcpstr)
 system(gdaltrans_cmd)
 
+################################################################################################################
+################################################################################################################
+################################################################################################################
+
 
 
 library(raster)
+library(rjson)
+
 fixfiles = c("J:/l1g_warp/L1G_targz/LM40450301983103AAA03/LM40450301983103_archv.tif",
              "J:/l1g_warp/L1G_targz/LM40450301992176AAA03/LM40450301992176_archv.tif"
              )
 reffile = "J:/l1g_warp/LM50450301985132AAA04/LM50450301985132_archv.tif"
-outdir = "J:/l1g_warp/imgs"
+outdir = "C:/git_repos/L1G-2-L1T"
 
 make_tiepoint_img = function(imgfile,outdir){
   img = brick(imgfile)
@@ -102,35 +113,10 @@ loop_tie_points = function(reffile, reffiles, outdir){
 }
 
 info = loop_tie_points(reffile,fixfiles,outdir)
-
-list(ref=list(file="test",point=c(list("orig"))))
-
-
-
-
-writeplot = function(file,plot,gmBounds,date,tcb,tcg,tcw,tca, first=F,last=F, end=F, finalPlot=F){
-  chipstrip = paste('"imgs/plot_',plot,'_chipstrip.png",',sep="")
-  start=paste('{"plotID": ',plot,',','"chipStrip":',chipstrip,'"LatLon":[',gmBounds[1,2],',',gmBounds[1,1],'],','"bounds":[',gmBounds[2,2],',',gmBounds[3,2],',',gmBounds[3,1],',',gmBounds[2,1],'],','"Values": [')
-  int=', '
-  if(end == T & finalPlot == F){end=']},'} else if(end == T & finalPlot == T){end=']}'}
-  imginfo = paste(
-    paste('{"Year": ', date,',',sep=""),
-    paste(' "TCB": ', tcb,',',sep=""),
-    paste(' "TCG": ', tcg,',',sep=""),
-    paste(' "TCW": ', tcw,',',sep=""),
-    paste(' "TCA": ', tca,sep=""),
-    '}',
-    sep="")
-  if(first == T){
-    write(start, file, append=TRUE)
-    write(paste(imginfo,int,sep=""), file, append=TRUE)
-  }
-  if(first != T & last != T){write(paste(imginfo,int,sep=""), file, append=TRUE)}
-  if(last == T){
-    write(imginfo, file, append=TRUE)
-    write(end, file, append=TRUE)
-  }
-}
+js = toJSON(info)
+js = paste("info =",js)
+outfile = file.path(outdir,"imgInfo.js")
+write(js, outfile)
 
 
 
