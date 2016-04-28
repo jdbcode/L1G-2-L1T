@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lan="en">
+	<head>
+		<title>L1G-2-L1T Tie Point Selector</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+		<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+        <script src="imgInfo.js"></script>	
+		<script>
+			//Zoom 1.7.15
+			//license: MIT
+			//http://www.jacklmoore.com/zoom
+			(function($){var defaults={url:false,callback:false,target:false,duration:120,on:"mouseover",touch:true,onZoomIn:false,onZoomOut:false,magnify:1};$.zoom=function(target,source,img,magnify){var targetHeight,targetWidth,sourceHeight,sourceWidth,xRatio,yRatio,offset,$target=$(target),position=$target.css("position"),$source=$(source);$target.css("position",/(absolute|fixed)/.test(position)?position:"relative");$target.css("overflow","hidden");img.style.width=img.style.height="";$(img).addClass("zoomImg").css({position:"absolute",top:0,left:0,opacity:0,width:img.width*magnify,height:img.height*magnify,border:"none",maxWidth:"none",maxHeight:"none"}).appendTo(target);return{init:function(){targetWidth=$target.outerWidth();targetHeight=$target.outerHeight();if(source===$target[0]){sourceWidth=targetWidth;sourceHeight=targetHeight}else{sourceWidth=$source.outerWidth();sourceHeight=$source.outerHeight()}xRatio=(img.width-targetWidth)/sourceWidth;yRatio=(img.height-targetHeight)/sourceHeight;offset=$source.offset()},move:function(e){var left=e.pageX-offset.left,top=e.pageY-offset.top;top=Math.max(Math.min(top,sourceHeight),0);left=Math.max(Math.min(left,sourceWidth),0);img.style.left=left*-xRatio+"px";img.style.top=top*-yRatio+"px"}}};$.fn.zoom=function(options){return this.each(function(){var settings=$.extend({},defaults,options||{}),target=settings.target||this,source=this,$source=$(source),$target=$(target),img=document.createElement("img"),$img=$(img),mousemove="mousemove.zoom",clicked=false,touched=false,$urlElement;if(!settings.url){$urlElement=$source.find("img");if($urlElement[0]){settings.url=$urlElement.data("src")||$urlElement.attr("src")}if(!settings.url){return}}(function(){var position=$target.css("position");var overflow=$target.css("overflow");$source.one("zoom.destroy",function(){$source.off(".zoom");$target.css("position",position);$target.css("overflow",overflow);$img.remove()})})();img.onload=function(){var zoom=$.zoom(target,source,img,settings.magnify);function start(e){zoom.init();zoom.move(e);$img.stop().fadeTo($.support.opacity?settings.duration:0,1,$.isFunction(settings.onZoomIn)?settings.onZoomIn.call(img):false)}function stop(){$img.stop().fadeTo(settings.duration,0,$.isFunction(settings.onZoomOut)?settings.onZoomOut.call(img):false)}if(settings.on==="grab"){$source.on("mousedown.zoom",function(e){if(e.which===1){$(document).one("mouseup.zoom",function(){stop();$(document).off(mousemove,zoom.move)});start(e);$(document).on(mousemove,zoom.move);e.preventDefault()}})}else if(settings.on==="click"){$source.on("click.zoom",function(e){if(clicked){return}else{clicked=true;start(e);$(document).on(mousemove,zoom.move);$(document).one("click.zoom",function(){stop();clicked=false;$(document).off(mousemove,zoom.move)});return false}})}else if(settings.on==="toggle"){$source.on("click.zoom",function(e){if(clicked){stop()}else{start(e)}clicked=!clicked})}else if(settings.on==="mouseover"){zoom.init();$source.on("mouseenter.zoom",start).on("mouseleave.zoom",stop).on(mousemove,zoom.move)}if(settings.touch){$source.on("touchstart.zoom",function(e){e.preventDefault();if(touched){touched=false;stop()}else{touched=true;start(e.originalEvent.touches[0]||e.originalEvent.changedTouches[0])}}).on("touchmove.zoom",function(e){e.preventDefault();zoom.move(e.originalEvent.touches[0]||e.originalEvent.changedTouches[0])}).on("touchend.zoom",function(e){e.preventDefault();if(touched){touched=false;stop()}})}if($.isFunction(settings.callback)){settings.callback.call(img)}};img.src=settings.url})};$.fn.zoom.defaults=defaults})(window.jQuery);
+		</script>
+		<script>
+			//* imagesLoaded PACKAGED v4.1.0
+			//* JavaScript is all like "You images are done yet or what?"
+			//* MIT License
+			!function(t,e){"function"==typeof define&&define.amd?define("ev-emitter/ev-emitter",e):"object"==typeof module&&module.exports?module.exports=e():t.EvEmitter=e()}(this,function(){function t(){}var e=t.prototype;return e.on=function(t,e){if(t&&e){var i=this._events=this._events||{},n=i[t]=i[t]||[];return-1==n.indexOf(e)&&n.push(e),this}},e.once=function(t,e){if(t&&e){this.on(t,e);var i=this._onceEvents=this._onceEvents||{},n=i[t]=i[t]||[];return n[e]=!0,this}},e.off=function(t,e){var i=this._events&&this._events[t];if(i&&i.length){var n=i.indexOf(e);return-1!=n&&i.splice(n,1),this}},e.emitEvent=function(t,e){var i=this._events&&this._events[t];if(i&&i.length){var n=0,o=i[n];e=e||[];for(var r=this._onceEvents&&this._onceEvents[t];o;){var s=r&&r[o];s&&(this.off(t,o),delete r[o]),o.apply(this,e),n+=s?0:1,o=i[n]}return this}},t}),function(t,e){"use strict";"function"==typeof define&&define.amd?define(["ev-emitter/ev-emitter"],function(i){return e(t,i)}):"object"==typeof module&&module.exports?module.exports=e(t,require("ev-emitter")):t.imagesLoaded=e(t,t.EvEmitter)}(window,function(t,e){function i(t,e){for(var i in e)t[i]=e[i];return t}function n(t){var e=[];if(Array.isArray(t))e=t;else if("number"==typeof t.length)for(var i=0;i<t.length;i++)e.push(t[i]);else e.push(t);return e}function o(t,e,r){return this instanceof o?("string"==typeof t&&(t=document.querySelectorAll(t)),this.elements=n(t),this.options=i({},this.options),"function"==typeof e?r=e:i(this.options,e),r&&this.on("always",r),this.getImages(),h&&(this.jqDeferred=new h.Deferred),void setTimeout(function(){this.check()}.bind(this))):new o(t,e,r)}function r(t){this.img=t}function s(t,e){this.url=t,this.element=e,this.img=new Image}var h=t.jQuery,a=t.console;o.prototype=Object.create(e.prototype),o.prototype.options={},o.prototype.getImages=function(){this.images=[],this.elements.forEach(this.addElementImages,this)},o.prototype.addElementImages=function(t){"IMG"==t.nodeName&&this.addImage(t),this.options.background===!0&&this.addElementBackgroundImages(t);var e=t.nodeType;if(e&&d[e]){for(var i=t.querySelectorAll("img"),n=0;n<i.length;n++){var o=i[n];this.addImage(o)}if("string"==typeof this.options.background){var r=t.querySelectorAll(this.options.background);for(n=0;n<r.length;n++){var s=r[n];this.addElementBackgroundImages(s)}}}};var d={1:!0,9:!0,11:!0};return o.prototype.addElementBackgroundImages=function(t){var e=getComputedStyle(t);if(e)for(var i=/url\((['"])?(.*?)\1\)/gi,n=i.exec(e.backgroundImage);null!==n;){var o=n&&n[2];o&&this.addBackground(o,t),n=i.exec(e.backgroundImage)}},o.prototype.addImage=function(t){var e=new r(t);this.images.push(e)},o.prototype.addBackground=function(t,e){var i=new s(t,e);this.images.push(i)},o.prototype.check=function(){function t(t,i,n){setTimeout(function(){e.progress(t,i,n)})}var e=this;return this.progressedCount=0,this.hasAnyBroken=!1,this.images.length?void this.images.forEach(function(e){e.once("progress",t),e.check()}):void this.complete()},o.prototype.progress=function(t,e,i){this.progressedCount++,this.hasAnyBroken=this.hasAnyBroken||!t.isLoaded,this.emitEvent("progress",[this,t,e]),this.jqDeferred&&this.jqDeferred.notify&&this.jqDeferred.notify(this,t),this.progressedCount==this.images.length&&this.complete(),this.options.debug&&a&&a.log("progress: "+i,t,e)},o.prototype.complete=function(){var t=this.hasAnyBroken?"fail":"done";if(this.isComplete=!0,this.emitEvent(t,[this]),this.emitEvent("always",[this]),this.jqDeferred){var e=this.hasAnyBroken?"reject":"resolve";this.jqDeferred[e](this)}},r.prototype=Object.create(e.prototype),r.prototype.check=function(){var t=this.getIsImageComplete();return t?void this.confirm(0!==this.img.naturalWidth,"naturalWidth"):(this.proxyImage=new Image,this.proxyImage.addEventListener("load",this),this.proxyImage.addEventListener("error",this),this.img.addEventListener("load",this),this.img.addEventListener("error",this),void(this.proxyImage.src=this.img.src))},r.prototype.getIsImageComplete=function(){return this.img.complete&&void 0!==this.img.naturalWidth},r.prototype.confirm=function(t,e){this.isLoaded=t,this.emitEvent("progress",[this,this.img,e])},r.prototype.handleEvent=function(t){var e="on"+t.type;this[e]&&this[e](t)},r.prototype.onload=function(){this.confirm(!0,"onload"),this.unbindEvents()},r.prototype.onerror=function(){this.confirm(!1,"onerror"),this.unbindEvents()},r.prototype.unbindEvents=function(){this.proxyImage.removeEventListener("load",this),this.proxyImage.removeEventListener("error",this),this.img.removeEventListener("load",this),this.img.removeEventListener("error",this)},s.prototype=Object.create(r.prototype),s.prototype.check=function(){this.img.addEventListener("load",this),this.img.addEventListener("error",this),this.img.src=this.url;var t=this.getIsImageComplete();t&&(this.confirm(0!==this.img.naturalWidth,"naturalWidth"),this.unbindEvents())},s.prototype.unbindEvents=function(){this.img.removeEventListener("load",this),this.img.removeEventListener("error",this)},s.prototype.confirm=function(t,e){this.isLoaded=t,this.emitEvent("progress",[this,this.element,e])},o.makeJQueryPlugin=function(e){e=e||t.jQuery,e&&(h=e,h.fn.imagesLoaded=function(t,e){var i=new o(this,t,e);return i.jqDeferred.promise(h(this))})},o.makeJQueryPlugin(),o});
+		</script>
+		<style>
+			.imgholder{
+				display:inline-block;
+			}
+			td{
+				border: 1px solid black;
+			}			
+			table{
+				position:absolute;
+				pointer-events: none;
+				border-collapse: collapse;
+				border-spacing: 0;
+			}
+			.svgDiv{
+				position:absolute;
+				pointer-events: none;
+			}
+			circle{
+				z-index: 10;
+			}
+		</style>				
+	</head>
+	<body>
+		<div id="container" style="margin:15px">
+			<h3 id="title" class="text-muted">""</h3>
+			<div id="imgContainer" style="height:640px">
+				<div class="imgholder">
+					<h4 class="text-muted">""</h4>
+					<div id="refImgDiv" class="imgDiv"></div>
+				</div>
+				<div class="imgholder">
+					<h4 class="text-muted">""</h4>
+					<div id="fixImgDiv" class="imgDiv"></div>
+				</div>
+			</div>			
+		</div>
+		<a id="downLoad" class="btn btn-default disabled btn-lg" role="button" style="margin-left:15px">Download Tie Points</a>
+		<table id="refImgGrid" style="display:none">
+			<tr>
+				<td></td><td></td><td></td><td></td>
+			</tr>
+			<tr>
+				<td></td><td></td><td></td><td></td>
+			</tr>
+			<tr>
+				<td></td><td></td><td></td><td></td>
+			</tr>
+			<tr>
+				<td></td><td></td><td></td><td></td>
+			</tr>
+		</table>
+		<table id="fixImgGrid" style="display:none">
+			<tr>
+				<td></td><td></td><td></td><td></td>
+			</tr>
+			<tr>
+				<td></td><td></td><td></td><td></td>
+			</tr>
+			<tr>
+				<td></td><td></td><td></td><td></td>
+			</tr>
+			<tr>
+				<td></td><td></td><td></td><td></td>
+			</tr>
+		</table>
+		<div id="refSvgDiv" class="svgDiv">
+			<svg id="refSvg"></svg>
+		</div>
+		<div id="fixSvgDiv" class="svgDiv">
+			<svg id="fixSvg"></svg>
+		</div>	
+
+		<script>		
+			//#################################################################################################################################
+			//##############GLOBAL VARIABLES##############
+			//#################################################################################################################################
+			
+			var color = ["#3396fb","#ffd700","#00ff83"]
+			var current = 0;
+			var point = 0;
+			var itpInfo = [];
+
+			//#################################################################################################################################
+			//##############FUNCTIONS##############
+			//#################################################################################################################################
+			
+			function setPosition(refDiv, setObj, type){
+				var obj = $('#'+refDiv);
+				var refHeight = obj[0].getBoundingClientRect().height;
+				var refWidth = obj[0].getBoundingClientRect().width;
+				var refOffset = obj.offset();
+				if(type == "table"){
+					$('#'+setObj).height(refHeight).width(refWidth).css({"top":refOffset.top,"left":refOffset.left});
+					//$('#'+setObj).height(refHeight-1).width(refWidth-1).css({"top":refOffset.top,"left":refOffset.left});
+				} else if(type == "div"){
+					$('#'+setObj).height(refHeight).width(refWidth).css({"top":refOffset.top,"left":refOffset.left});
+					if (setObj.indexOf("ref") >= 0){$("#refSvg").attr({"height":refHeight, "width":refWidth})} else
+					if (setObj.indexOf("fix") >= 0){$("#fixSvg").attr({"height":refHeight, "width":refWidth})}
+				}				
+			}
+			
+			function getImgId(path){
+				var bname = path.split(/[\\/]/).pop();
+				var imgID = bname.substring(0, 15);
+				return imgID;
+			}
+			
+			function loadImg(imgSrc, type){
+				//set variables depending on imgSrc type ("ref"(default) or "fix")
+				var imgDiv = "refImgDiv";
+				var imgGrid = "refImgGrid";
+				var svgDiv = "refSvgDiv";
+				var title = "Reference Image: ";
+				if(type == "fix"){
+					imgDiv = "fixImgDiv";
+					imgGrid = "fixImgGrid";
+					svgDiv = "fixSvgDiv";
+					title = "Fix Image: ";
+				}
+				
+				//title the image
+				var imgId = getImgId(imgSrc);				
+				$("#"+imgDiv).siblings("h4").text(title+imgId);
+				
+				//append the image, the grid, and the svg
+				$("#"+imgDiv).append('<img class="zoomImg" src='+imgSrc+' width=auto height=600px>')
+				.zoom({url:imgSrc, magnify:1.5, duration: 50})
+				.imagesLoaded(function(){
+					setPosition(imgDiv, imgGrid, "table");
+					setPosition(imgDiv, svgDiv, "div");
+					$("#"+imgGrid).show();
+				});	
+			}
+			
+			function makeSVG(tag, attrs) {
+				var el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+				for(var k in attrs){el.setAttribute(k, attrs[k])};
+				return el;
+			}
+			
+			function appendCircle(el, e){
+				var parentOffset = el.offset();
+				var relX = e.pageX - parentOffset.left;
+				var relY = e.pageY - parentOffset.top;
+				var circle = makeSVG("circle", {cx:relX, cy:relY, r:5, fill:color[point]});
+				
+				if (el.context.id.indexOf("ref") >= 0){
+					if(itpInfo[current].ref.point[point].row == 0){
+						document.getElementById("refSvg").appendChild(circle);						
+						var row = relY * (itpInfo[current].ref.origSize.rows/itpInfo[current].ref.smallSize.rows);
+						var col = relX * (itpInfo[current].ref.origSize.cols/itpInfo[current].ref.smallSize.cols);
+						itpInfo[current].ref.point[point].row = row;
+						itpInfo[current].ref.point[point].col = col;
+						//console.log(relY)
+						//console.log(itpInfo[current].ref.origSize.rows)
+						//console.log(itpInfo[current].ref.smallSize.rows)
+						//console.log(row)	
+					} else if(itpInfo[current].fix.point[point].row == 0){
+						alert('Please identify a corresponding point in the "Fix Image"')
+					}					
+				} else if (el.context.id.indexOf("fix") >= 0){
+					if(itpInfo[current].fix.point[point].row == 0){
+						document.getElementById("fixSvg").appendChild(circle);
+						var row = relY * (itpInfo[current].fix.origSize.rows/itpInfo[current].fix.smallSize.rows);
+						var col = relX * (itpInfo[current].fix.origSize.cols/itpInfo[current].fix.smallSize.cols);
+						itpInfo[current].fix.point[point].row = row;
+						itpInfo[current].fix.point[point].col = col;
+					} else if(itpInfo[current].ref.point[point].row == 0){
+						alert('Please identify a corresponding point in the "Reference Image"')
+					} 
+				}
+				
+				if(itpInfo[current].fix.point[point].row != 0 && itpInfo[current].ref.point[point].row != 0){point += 1;}
+				console.log("point"+point)
+				if(point == 3){
+					point = 0;
+					current += 1;
+					if(current == info.fixInfo.imgFile.length){
+						var data = "text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(itpInfo));
+						$("#downLoad").attr({href:"data:" + data, download:"data.json"}).removeClass("disabled btn-default").addClass("btn-success");
+						$(".imgDiv").empty();
+						$("svg").empty();
+					} else{
+						$(".imgDiv").empty();
+						$("svg").empty();
+						loadImg(info.refInfo.imgFile, "ref");
+						loadImg(info.fixInfo.imgFile[current], "fix");
+					}
+				}
+			}
+			
+			//create the info json object to store coordinate info and be run through R
+			function createItpInfo(){						
+				info.fixInfo.imgFile.forEach(function(e, i){
+					itpInfo.push({"ref":{"file":"","point":[],"origSize":{"rows":0,"cols":0},"medSize":{"rows":0,"cols":0},"smallSize":{"rows":0,"cols":0}}, "fix":{"file":"","point":[],"origSize":{"rows":0,"cols":0},"medSize":{"rows":0,"cols":0},"smallSize":{"rows":0,"cols":0}}, "process":0, "note":""});
+					//move some info from the R json output to the the js json output 
+					//reference file info
+					itpInfo[i].ref.file = info.refInfo.origFile;		
+					itpInfo[i].ref.origSize.rows = info.refInfo.origRows
+					itpInfo[i].ref.origSize.cols = info.refInfo.origCols
+					itpInfo[i].ref.medSize.rows = info.refInfo.imgRows
+					itpInfo[i].ref.medSize.cols = info.refInfo.imgCols
+					itpInfo[i].ref.smallSize.cols = info.refInfo.imgCols * (600/info.refInfo.imgRows)
+					itpInfo[i].ref.smallSize.rows = 600
+								
+					//fix files info
+					itpInfo[i].fix.file = info.fixInfo.origFile[i];
+					itpInfo[i].fix.origSize.rows = info.fixInfo.origRows[i]
+					itpInfo[i].fix.origSize.cols = info.fixInfo.origCols[i]
+					itpInfo[i].fix.medSize.rows = info.fixInfo.imgRows[i]
+					itpInfo[i].fix.medSize.cols = info.fixInfo.imgCols[i]
+					itpInfo[i].fix.smallSize.cols = info.fixInfo.imgCols[i] * (600/info.fixInfo.imgRows[i])
+					itpInfo[i].fix.smallSize.rows = 600
+					//push 3 point row and col objects
+					for(p=0;p<3;p++){
+						itpInfo[i].ref.point.push({"row":0,"col":0});
+						itpInfo[i].fix.point.push({"row":0,"col":0});
+					}
+				});
+			}
+			
+			function setTitle(imgPath){
+				var imgId = getImgId(info.refInfo.imgFile);
+				var wrs = 1;
+				if(imgId.substring(2, 3) > 3){wrs = 2};
+				var pathRowId  = imgId.substring(3, 6)+"/"+imgId.substring(6, 9);
+				var title = "WRS-"+wrs+" Path/Row: "+pathRowId;
+				$("#title").text(title);
+			}
+			
+			//#################################################################################################################################
+			//##############LISTENERS##############
+			//#################################################################################################################################
+			
+			//load the first set of images when the window loads
+			$(window).load(function(){
+				setTitle(info.refInfo.imgFile);
+				loadImg(info.refInfo.imgFile, "ref");
+				loadImg(info.fixInfo.imgFile[current], "fix");
+				createItpInfo();				
+			})
+			
+			$(".imgDiv").click(function(e){
+				appendCircle($(this), e, point)
+			});
+		</script>	
+	</body>
+</html>
