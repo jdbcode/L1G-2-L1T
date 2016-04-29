@@ -13,8 +13,8 @@ make_tiepoint_img = function(imgfile,outdir){
   img = brick(imgfile)
   rows = nrow(img)
   cols = ncol(img)
-  newrows = ceiling(0.4 * rows)
-  newcols = ceiling(0.4 * cols)
+  newrows = ceiling(1 * rows) #0.4
+  newcols = ceiling(1 * cols) #0.4
   print(paste("rows:",newrows))
   print(paste("cols:",newcols))
   newbname = sub("archv.tif","archv.png",basename(imgfile))
