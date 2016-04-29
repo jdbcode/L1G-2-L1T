@@ -62,6 +62,9 @@
 				image-rendering: optimize-contrast;         /* CSS3 Proposed                  */
 				-ms-interpolation-mode: nearest-neighbor;   /* IE8+                           */
 			}
+			.zoomMatch{
+				position:absolute;
+			}
 		</style>				
 	</head>
 	<body>
@@ -78,28 +81,22 @@
 				</div>
 			</div>			
 		</div>
-		
-		
-		
 
+		<div class="btn-group" style="margin-left:15px">
+			<button id="nextImgBtn" type="button" class="btn btn-default finished">Next Image  <span class="glyphicon glyphicon-step-forward"></span></button>    
+			<!-- <button id="showPointsBtn" type="button" class="btn btn-default finished">Show Points  <span class="glyphicon glyphicon-eye-open"></span></button> -->
+			<div class="btn-group">
+				<button type="button" class="btn btn-default dropdown-toggle finished" data-toggle="dropdown">Skip  <span class="glyphicon glyphicon-chevron-down"></span></button>
+				<ul class="dropdown-menu" role="menu">
+					<li><a href="#">Too much cloud</a></li>
+				</ul>
+			</div>
+			<button id="pointsBtn" type="button" class="btn btn-default disabled">Points: 0</button>
+			<button id="imagesBtn"  type="button" class="btn btn-default disabled">Image:</button> 
+			<a id="downLoad" class="btn btn-default disabled" role="button">Download Tie Points</a> <!-- btn-lg-->
+		</div>
 		
-<div class="btn-group" style="margin-left:15px">
-	<button id="nextImgBtn" type="button" class="btn btn-default finished">Next Image  <span class="glyphicon glyphicon-step-forward"></span></button>    
-	<button id="ZoomOutBtn" type="button" class="btn btn-default finished">Zoom Out  <span class="glyphicon glyphicon-fullscreen"></span></button>
-	<div class="btn-group">
-		<button type="button" class="btn btn-default dropdown-toggle finished" data-toggle="dropdown">Skip  <span class="glyphicon glyphicon-chevron-down"></span></button>
-		<ul class="dropdown-menu" role="menu">
-			<li><a href="#">Too much cloud</a></li>
-		</ul>
-	</div>
-	<button id="pointsBtn" type="button" class="btn btn-default disabled">Points: 0</button>
-	<button id="imagesBtn"  type="button" class="btn btn-default disabled">Image:</button> 
-	<a id="downLoad" class="btn btn-default disabled" role="button">Download Tie Points</a> <!-- btn-lg-->
-</div>
-		
-		
-		
-		<table id="refImgGrid" style="display:none">
+ 		<table id="refImgGrid"> <!--  style="display:none" -->
 			<tr>
 				<td></td><td></td><td></td><td></td>
 			</tr>
@@ -113,7 +110,7 @@
 				<td></td><td></td><td></td><td></td>
 			</tr>
 		</table>
-		<table id="fixImgGrid" style="display:none">
+		<table id="fixImgGrid"> <!--  style="display:none" -->
 			<tr>
 				<td></td><td></td><td></td><td></td>
 			</tr>
@@ -155,9 +152,10 @@
 				var refHeight = obj[0].getBoundingClientRect().height;
 				var refWidth = obj[0].getBoundingClientRect().width;
 				var refOffset = obj.offset();
+				console.log("width: "+refWidth)
 				if(type == "table"){
-					$('#'+setObj).height(refHeight).width(refWidth).css({"top":refOffset.top,"left":refOffset.left});
-					//$('#'+setObj).height(refHeight-1).width(refWidth-1).css({"top":refOffset.top,"left":refOffset.left});
+					//$('#'+setObj).height(refHeight).width(refWidth).css({"top":refOffset.top,"left":refOffset.left});
+					$('#'+setObj).height(refHeight-1).width(refWidth-1).css({"top":refOffset.top,"left":refOffset.left});
 				} else if(type == "div"){
 					$('#'+setObj).height(refHeight).width(refWidth).css({"top":refOffset.top,"left":refOffset.left});
 					if (setObj.indexOf("ref") >= 0){$("#refSvg").attr({"height":refHeight, "width":refWidth})} else
@@ -199,7 +197,7 @@
 					$("#"+imgGrid).show();
 				});	
 								
-				wheelzoom(document.getElementById(id));
+				wheelzoom(document.getElementById(id), {zoom:0.3});
 			}
 			
 			function makeSVG(tag, attrs) {
@@ -212,7 +210,7 @@
 				var parentOffset = el.offset();
 				var relX = e.pageX - parentOffset.left;
 				var relY = e.pageY - parentOffset.top;
-				var circle = makeSVG("circle", {cx:relX, cy:relY, r:5, fill:color}); //color[point]
+				var circle = makeSVG("circle", {cx:relX, cy:relY, r:5, fill:"#00d27f"}); //color[point]
 				if(el.attr('id') == "refImgDiv"){var imgId = "refImg"} else {var imgId = "fixImg"}
 				var bckgrdPos = $("#"+imgId).css("background-position").split(" ");
 				var bckgrdSiz = $("#"+imgId).css("background-size").split(" ");
@@ -265,7 +263,7 @@
 					done.ref = 0;
 					done.fix = 0;
 					color = randomColor();
-					$("svg circle").fadeOut(1000); //, function(){$(this).remove();});
+					$("svg circle").fadeOut(2000); //, function(){$(this).remove();});
 					$("#pointsBtn").text("Points: "+point)
 				}
 				//if(point == 3){
@@ -310,14 +308,14 @@
 					itpInfo[i].fix.smallSize.cols = info.fixInfo.imgCols[i] * (600/info.fixInfo.imgRows[i])
 					itpInfo[i].fix.smallSize.rows = 600
 					//push 3 point row and col objects
-					for(p=0;p<3;p++){
-						itpInfo[i].ref.point.push({"row":0,"col":0});
-						itpInfo[i].fix.point.push({"row":0,"col":0});
-					}
+					//for(p=0;p<3;p++){
+					//	itpInfo[i].ref.point.push({"row":0,"col":0});
+					//	itpInfo[i].fix.point.push({"row":0,"col":0});
+					//}
 				});
 			}
 			
-			function setTitle(imgPath){
+			function setTitle(){
 				var imgId = getImgId(info.refInfo.imgFile);
 				var wrs = 1;
 				if(imgId.substring(2, 3) > 3){wrs = 2};
@@ -325,6 +323,15 @@
 				var title = "WRS-"+wrs+" Path/Row: "+pathRowId;
 				$("#title").text(title);
 			}
+			
+			function makeJsonName(){
+				var imgId = getImgId(info.refInfo.imgFile);
+				var wrs = 1;
+				if(imgId.substring(2, 3) > 3){wrs = 2};
+				var fname = "wrs"+wrs+"_"+imgId.substring(3, 6)+imgId.substring(6, 9)+"_tie_points.json";
+				return fname
+			}
+			
 			
 			function imageBtnText(){
 				$("#imagesBtn").text("Image: "+(current+1)+"/"+info.fixInfo.imgFile.length);
@@ -356,8 +363,8 @@
 					$(".imgDiv").empty();
 					$("svg").empty();
 					if(current == info.fixInfo.imgFile.length){
-						var data = "text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(itpInfo));
-						$("#downLoad").attr({href:"data:" + data, download:"data.json"}).removeClass("disabled btn-default").addClass("btn-success");
+						var data = "text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(itpInfo));						
+						$("#downLoad").attr({href:"data:" + data, download:makeJsonName()}).removeClass("disabled btn-default").addClass("btn-success"); //"data.json"
 						$(".finished").addClass("disabled");
 						$(".imgTile").text("")
 						$("#refImgTitle").text('Done! Click the green "Download Tie Points" button below.')
@@ -379,16 +386,19 @@
 				zoomOut = 0;							
 			})
 			
-			$("#ZoomOutBtn").click(function(){
-				var refPos = Math.floor(itpInfo[current].ref.smallSize.cols)+"px"+" "+Math.floor(itpInfo[current].ref.smallSize.rows)+"px";
-				var fixPos = Math.floor(itpInfo[current].fix.smallSize.cols)+"px"+" "+Math.floor(itpInfo[current].fix.smallSize.rows)+"px";
-				$("#refImg").css({"background-position":"0px 0px","background-size":refPos});
-				$("#fixImg").css({"background-position":"0px 0px","background-size":fixPos});
+			$("#showPointsBtn").click(function(){
+				var refSiz = Math.floor(itpInfo[current].ref.smallSize.cols)+"px"+" "+Math.floor(itpInfo[current].ref.smallSize.rows)+"px";
+				var fixSiz = Math.floor(itpInfo[current].fix.smallSize.cols)+"px"+" "+Math.floor(itpInfo[current].fix.smallSize.rows)+"px";
+				$("#refImg").css({"background-position":"0px 0px","background-size":refSiz});
+				$("#fixImg").css({"background-position":"0px 0px","background-size":fixSiz});
 				$("svg circle").fadeIn(500);
+				document.getElementById("refImg").dispatchEvent(new CustomEvent('wheelzoom.destroy'));
+				wheelzoom(document.getElementById("refImg"), {zoom:0.3});
+				document.getElementById("fixImg").dispatchEvent(new CustomEvent('wheelzoom.destroy'));
+				wheelzoom(document.getElementById("fixImg"), {zoom:0.3});
 				zoomOut = 1;
 			})
-			
-			
+				
 		</script>	
 	</body>
 </html>
