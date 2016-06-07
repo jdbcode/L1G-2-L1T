@@ -87,8 +87,9 @@
 			<!-- <button id="showPointsBtn" type="button" class="btn btn-default finished">Show Points  <span class="glyphicon glyphicon-eye-open"></span></button> -->
 			<div class="btn-group">
 				<button type="button" class="btn btn-default dropdown-toggle finished" data-toggle="dropdown">Skip  <span class="glyphicon glyphicon-chevron-down"></span></button>
-				<ul class="dropdown-menu" role="menu">
+				<ul id="skipList" class="dropdown-menu" role="menu">
 					<li><a href="#">Too much cloud</a></li>
+					<li><a href="#">Bad lines</a></li>
 				</ul>
 			</div>
 			<button id="pointsBtn" type="button" class="btn btn-default disabled">Points: 0</button>
@@ -141,7 +142,7 @@
 			var itpInfo = [];
 			var done = {"ref":0,"fix":0}
 			var color = randomColor();
-			var zoomOut = 0
+			//var zoomOut = 0
 
 			//#################################################################################################################################
 			//##############FUNCTIONS##############
@@ -282,13 +283,11 @@
 				//	}
 				//}	
 			}
-			
-			
-			
+					
 			//create the info json object to store coordinate info and be run through R
 			function createItpInfo(){						
 				info.fixInfo.imgFile.forEach(function(e, i){
-					itpInfo.push({"ref":{"file":"","point":[],"origSize":{"rows":0,"cols":0},"medSize":{"rows":0,"cols":0},"smallSize":{"rows":0,"cols":0}}, "fix":{"file":"","point":[],"origSize":{"rows":0,"cols":0},"medSize":{"rows":0,"cols":0},"smallSize":{"rows":0,"cols":0}}, "process":0, "note":""});
+					itpInfo.push({"ref":{"file":"","point":[],"origSize":{"rows":0,"cols":0},"medSize":{"rows":0,"cols":0},"smallSize":{"rows":0,"cols":0}}, "fix":{"file":"","point":[],"origSize":{"rows":0,"cols":0},"medSize":{"rows":0,"cols":0},"smallSize":{"rows":0,"cols":0}}, "process":1, "note":"No problem"});
 					//move some info from the R json output to the the js json output 
 					//reference file info
 					itpInfo[i].ref.file = info.refInfo.origFile;		
@@ -331,10 +330,31 @@
 				var fname = "wrs"+wrs+"_"+imgId.substring(3, 6)+imgId.substring(6, 9)+"_tie_points.json";
 				return fname
 			}
-			
-			
+						
 			function imageBtnText(){
 				$("#imagesBtn").text("Image: "+(current+1)+"/"+info.fixInfo.imgFile.length);
+			}
+			
+			function imgAdvance(){
+				point = 0;
+				current += 1;
+				$(".imgDiv").empty();
+				$("svg").empty();
+				if(current == info.fixInfo.imgFile.length){
+					var data = "text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(itpInfo));						
+					$("#downLoad").attr({href:"data:" + data, download:makeJsonName()}).removeClass("disabled btn-default").addClass("btn-success"); //"data.json"
+					$(".finished").addClass("disabled");
+					$(".imgTile").text("")
+					$("#refImgTitle").text('Done! Click the green "Download Tie Points" button below.')
+					$
+				} else{
+					$(".imgDiv").empty();
+					$("svg").empty();
+					imageBtnText()
+					$("#pointsBtn").text("Points: "+point)
+					loadImg(info.refInfo.imgFile, "ref");
+					loadImg(info.fixInfo.imgFile[current], "fix");
+				}								
 			}
 			
 			
@@ -355,49 +375,37 @@
 				appendCircle($(this), e, point)
 			});
 			
+			$("#skipList li").click(function(){
+				itpInfo[current].process = 0;
+				itpInfo[current].note = $(this).text();
+				imgAdvance();
+			});
+					
 			$("#nextImgBtn").click(function(){
 				console.log(point);
 				if(point < 3){alert("Can't load the next image until you have at least 3 points. If you can't add points, then skip the image")} else{
-					point = 0;
-					current += 1;
-					$(".imgDiv").empty();
-					$("svg").empty();
-					if(current == info.fixInfo.imgFile.length){
-						var data = "text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(itpInfo));						
-						$("#downLoad").attr({href:"data:" + data, download:makeJsonName()}).removeClass("disabled btn-default").addClass("btn-success"); //"data.json"
-						$(".finished").addClass("disabled");
-						$(".imgTile").text("")
-						$("#refImgTitle").text('Done! Click the green "Download Tie Points" button below.')
-						$
-					} else{
-						$(".imgDiv").empty();
-						$("svg").empty();
-						imageBtnText()
-						$("#pointsBtn").text("Points: "+point)
-						loadImg(info.refInfo.imgFile, "ref");
-						loadImg(info.fixInfo.imgFile[current], "fix");
-					}					
+					imgAdvance();
 				}
 			});
 			
 
-			$(document).on("mousewheel","img",function(){
-				if(zoomOut == 1){$("svg circle").fadeOut(1500);}
-				zoomOut = 0;							
-			})
+			//$(document).on("mousewheel","img",function(){
+			//	if(zoomOut == 1){$("svg circle").fadeOut(1500);}
+			//	zoomOut = 0;							
+			//})
 			
-			$("#showPointsBtn").click(function(){
-				var refSiz = Math.floor(itpInfo[current].ref.smallSize.cols)+"px"+" "+Math.floor(itpInfo[current].ref.smallSize.rows)+"px";
-				var fixSiz = Math.floor(itpInfo[current].fix.smallSize.cols)+"px"+" "+Math.floor(itpInfo[current].fix.smallSize.rows)+"px";
-				$("#refImg").css({"background-position":"0px 0px","background-size":refSiz});
-				$("#fixImg").css({"background-position":"0px 0px","background-size":fixSiz});
-				$("svg circle").fadeIn(500);
-				document.getElementById("refImg").dispatchEvent(new CustomEvent('wheelzoom.destroy'));
-				wheelzoom(document.getElementById("refImg"), {zoom:0.3});
-				document.getElementById("fixImg").dispatchEvent(new CustomEvent('wheelzoom.destroy'));
-				wheelzoom(document.getElementById("fixImg"), {zoom:0.3});
-				zoomOut = 1;
-			})
+			//$("#showPointsBtn").click(function(){
+			//	var refSiz = Math.floor(itpInfo[current].ref.smallSize.cols)+"px"+" "+Math.floor(itpInfo[current].ref.smallSize.rows)+"px";
+			//	var fixSiz = Math.floor(itpInfo[current].fix.smallSize.cols)+"px"+" "+Math.floor(itpInfo[current].fix.smallSize.rows)+"px";
+			//	$("#refImg").css({"background-position":"0px 0px","background-size":refSiz});
+			//	$("#fixImg").css({"background-position":"0px 0px","background-size":fixSiz});
+			//	$("svg circle").fadeIn(500);
+			//	document.getElementById("refImg").dispatchEvent(new CustomEvent('wheelzoom.destroy'));
+			//	wheelzoom(document.getElementById("refImg"), {zoom:0.3});
+			//	document.getElementById("fixImg").dispatchEvent(new CustomEvent('wheelzoom.destroy'));
+			//	wheelzoom(document.getElementById("fixImg"), {zoom:0.3});
+			//	zoomOut = 1;
+			//})
 				
 		</script>	
 	</body>
