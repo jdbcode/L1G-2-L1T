@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lan="en">
+	<head>
+		<title>L1G-2-L1T Tie Point Selector</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+		<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+        <script src="imgInfo.js"></script>	
+		<script>
+			//imagesLoaded PACKAGED v4.1.0
+			//JavaScript is all like "You images are done yet or what?"
+			//MIT License
+			!function(t,e){"function"==typeof define&&define.amd?define("ev-emitter/ev-emitter",e):"object"==typeof module&&module.exports?module.exports=e():t.EvEmitter=e()}(this,function(){function t(){}var e=t.prototype;return e.on=function(t,e){if(t&&e){var i=this._events=this._events||{},n=i[t]=i[t]||[];return-1==n.indexOf(e)&&n.push(e),this}},e.once=function(t,e){if(t&&e){this.on(t,e);var i=this._onceEvents=this._onceEvents||{},n=i[t]=i[t]||[];return n[e]=!0,this}},e.off=function(t,e){var i=this._events&&this._events[t];if(i&&i.length){var n=i.indexOf(e);return-1!=n&&i.splice(n,1),this}},e.emitEvent=function(t,e){var i=this._events&&this._events[t];if(i&&i.length){var n=0,o=i[n];e=e||[];for(var r=this._onceEvents&&this._onceEvents[t];o;){var s=r&&r[o];s&&(this.off(t,o),delete r[o]),o.apply(this,e),n+=s?0:1,o=i[n]}return this}},t}),function(t,e){"use strict";"function"==typeof define&&define.amd?define(["ev-emitter/ev-emitter"],function(i){return e(t,i)}):"object"==typeof module&&module.exports?module.exports=e(t,require("ev-emitter")):t.imagesLoaded=e(t,t.EvEmitter)}(window,function(t,e){function i(t,e){for(var i in e)t[i]=e[i];return t}function n(t){var e=[];if(Array.isArray(t))e=t;else if("number"==typeof t.length)for(var i=0;i<t.length;i++)e.push(t[i]);else e.push(t);return e}function o(t,e,r){return this instanceof o?("string"==typeof t&&(t=document.querySelectorAll(t)),this.elements=n(t),this.options=i({},this.options),"function"==typeof e?r=e:i(this.options,e),r&&this.on("always",r),this.getImages(),h&&(this.jqDeferred=new h.Deferred),void setTimeout(function(){this.check()}.bind(this))):new o(t,e,r)}function r(t){this.img=t}function s(t,e){this.url=t,this.element=e,this.img=new Image}var h=t.jQuery,a=t.console;o.prototype=Object.create(e.prototype),o.prototype.options={},o.prototype.getImages=function(){this.images=[],this.elements.forEach(this.addElementImages,this)},o.prototype.addElementImages=function(t){"IMG"==t.nodeName&&this.addImage(t),this.options.background===!0&&this.addElementBackgroundImages(t);var e=t.nodeType;if(e&&d[e]){for(var i=t.querySelectorAll("img"),n=0;n<i.length;n++){var o=i[n];this.addImage(o)}if("string"==typeof this.options.background){var r=t.querySelectorAll(this.options.background);for(n=0;n<r.length;n++){var s=r[n];this.addElementBackgroundImages(s)}}}};var d={1:!0,9:!0,11:!0};return o.prototype.addElementBackgroundImages=function(t){var e=getComputedStyle(t);if(e)for(var i=/url\((['"])?(.*?)\1\)/gi,n=i.exec(e.backgroundImage);null!==n;){var o=n&&n[2];o&&this.addBackground(o,t),n=i.exec(e.backgroundImage)}},o.prototype.addImage=function(t){var e=new r(t);this.images.push(e)},o.prototype.addBackground=function(t,e){var i=new s(t,e);this.images.push(i)},o.prototype.check=function(){function t(t,i,n){setTimeout(function(){e.progress(t,i,n)})}var e=this;return this.progressedCount=0,this.hasAnyBroken=!1,this.images.length?void this.images.forEach(function(e){e.once("progress",t),e.check()}):void this.complete()},o.prototype.progress=function(t,e,i){this.progressedCount++,this.hasAnyBroken=this.hasAnyBroken||!t.isLoaded,this.emitEvent("progress",[this,t,e]),this.jqDeferred&&this.jqDeferred.notify&&this.jqDeferred.notify(this,t),this.progressedCount==this.images.length&&this.complete(),this.options.debug&&a&&a.log("progress: "+i,t,e)},o.prototype.complete=function(){var t=this.hasAnyBroken?"fail":"done";if(this.isComplete=!0,this.emitEvent(t,[this]),this.emitEvent("always",[this]),this.jqDeferred){var e=this.hasAnyBroken?"reject":"resolve";this.jqDeferred[e](this)}},r.prototype=Object.create(e.prototype),r.prototype.check=function(){var t=this.getIsImageComplete();return t?void this.confirm(0!==this.img.naturalWidth,"naturalWidth"):(this.proxyImage=new Image,this.proxyImage.addEventListener("load",this),this.proxyImage.addEventListener("error",this),this.img.addEventListener("load",this),this.img.addEventListener("error",this),void(this.proxyImage.src=this.img.src))},r.prototype.getIsImageComplete=function(){return this.img.complete&&void 0!==this.img.naturalWidth},r.prototype.confirm=function(t,e){this.isLoaded=t,this.emitEvent("progress",[this,this.img,e])},r.prototype.handleEvent=function(t){var e="on"+t.type;this[e]&&this[e](t)},r.prototype.onload=function(){this.confirm(!0,"onload"),this.unbindEvents()},r.prototype.onerror=function(){this.confirm(!1,"onerror"),this.unbindEvents()},r.prototype.unbindEvents=function(){this.proxyImage.removeEventListener("load",this),this.proxyImage.removeEventListener("error",this),this.img.removeEventListener("load",this),this.img.removeEventListener("error",this)},s.prototype=Object.create(r.prototype),s.prototype.check=function(){this.img.addEventListener("load",this),this.img.addEventListener("error",this),this.img.src=this.url;var t=this.getIsImageComplete();t&&(this.confirm(0!==this.img.naturalWidth,"naturalWidth"),this.unbindEvents())},s.prototype.unbindEvents=function(){this.img.removeEventListener("load",this),this.img.removeEventListener("error",this)},s.prototype.confirm=function(t,e){this.isLoaded=t,this.emitEvent("progress",[this,this.element,e])},o.makeJQueryPlugin=function(e){e=e||t.jQuery,e&&(h=e,h.fn.imagesLoaded=function(t,e){var i=new o(this,t,e);return i.jqDeferred.promise(h(this))})},o.makeJQueryPlugin(),o});
+		</script>
+		<script>
+			//Wheelzoom 3.0.4
+			//license: MIT
+			//http://www.jacklmoore.com/wheelzoom
+			window.wheelzoom=function(){var e={zoom:.1},t=document.createElement("canvas"),n=function(n,o){function r(e){e.style.backgroundImage='url("'+e.src+'")',e.style.backgroundRepeat="no-repeat",t.width=e.naturalWidth,t.height=e.naturalHeight,E=t.toDataURL(),e.src=E}function a(){f>0?f=0:l-g>f&&(f=l-g),w>0?w=0:v-p>w&&(w=v-p),n.style.backgroundSize=g+"px "+p+"px",n.style.backgroundPosition=f+"px "+w+"px"}function u(){g=l,p=v,f=w=0,a()}function d(e){var t=0;e.preventDefault(),e.deltaY?t=e.deltaY:e.wheelDelta&&(t=-e.wheelDelta);var o=n.getBoundingClientRect(),r=e.pageX-o.left-window.pageXOffset,d=e.pageY-o.top-window.pageYOffset,i=r-f,s=d-w,c=i/g,m=s/p;0>t?(g+=g*y.zoom,p+=p*y.zoom):(g-=g*y.zoom,p-=p*y.zoom),f=r-g*c,w=d-p*m,l>=g||v>=p?u():a()}function i(e){e.preventDefault(),f+=e.pageX-h.pageX,w+=e.pageY-h.pageY,h=e,a()}function s(){document.removeEventListener("mouseup",s),document.removeEventListener("mousemove",i)}function c(e){e.preventDefault(),h=e,document.addEventListener("mousemove",i),document.addEventListener("mouseup",s)}function m(){if(n.src!==E){var e=window.getComputedStyle(n,null);l=parseInt(e.width,10),v=parseInt(e.height,10),g=l,p=v,f=0,w=0,r(n),n.style.backgroundSize=l+"px "+v+"px",n.style.backgroundPosition="0 0",n.addEventListener("wheelzoom.reset",u),n.addEventListener("wheel",d),n.addEventListener("mousedown",c)}}if(n&&n.nodeName&&"IMG"===n.nodeName){var l,v,g,p,f,w,h,E,y={},L=function(e){n.removeEventListener("wheelzoom.destroy",L),n.removeEventListener("wheelzoom.reset",u),n.removeEventListener("load",m),n.removeEventListener("mouseup",s),n.removeEventListener("mousemove",i),n.removeEventListener("mousedown",c),n.removeEventListener("wheel",d),n.style.backgroundImage=e.backgroundImage,n.style.backgroundRepeat=e.backgroundRepeat,n.src=e.src}.bind(null,{backgroundImage:n.style.backgroundImage,backgroundRepeat:n.style.backgroundRepeat,src:n.src});n.addEventListener("wheelzoom.destroy",L),o=o||{},Object.keys(e).forEach(function(t){y[t]=void 0!==o[t]?o[t]:e[t]}),n.complete&&m(),n.addEventListener("load",m)}};return"function"!=typeof window.getComputedStyle?function(e){return e}:function(e,t){return e&&e.length?Array.prototype.forEach.call(e,n,t):e&&e.nodeName&&n(e,t),e}}();
+		</script>
+		<script>
+			//jQuery Mousewheel 3.1.13
+			//Copyright 2015 jQuery Foundation and other contributors
+			//Released under the MIT license.
+			//http://jquery.org/license
+			!function(a){"function"==typeof define&&define.amd?define(["jquery"],a):"object"==typeof exports?module.exports=a:a(jQuery)}(function(a){function b(b){var g=b||window.event,h=i.call(arguments,1),j=0,l=0,m=0,n=0,o=0,p=0;if(b=a.event.fix(g),b.type="mousewheel","detail"in g&&(m=-1*g.detail),"wheelDelta"in g&&(m=g.wheelDelta),"wheelDeltaY"in g&&(m=g.wheelDeltaY),"wheelDeltaX"in g&&(l=-1*g.wheelDeltaX),"axis"in g&&g.axis===g.HORIZONTAL_AXIS&&(l=-1*m,m=0),j=0===m?l:m,"deltaY"in g&&(m=-1*g.deltaY,j=m),"deltaX"in g&&(l=g.deltaX,0===m&&(j=-1*l)),0!==m||0!==l){if(1===g.deltaMode){var q=a.data(this,"mousewheel-line-height");j*=q,m*=q,l*=q}else if(2===g.deltaMode){var r=a.data(this,"mousewheel-page-height");j*=r,m*=r,l*=r}if(n=Math.max(Math.abs(m),Math.abs(l)),(!f||f>n)&&(f=n,d(g,n)&&(f/=40)),d(g,n)&&(j/=40,l/=40,m/=40),j=Math[j>=1?"floor":"ceil"](j/f),l=Math[l>=1?"floor":"ceil"](l/f),m=Math[m>=1?"floor":"ceil"](m/f),k.settings.normalizeOffset&&this.getBoundingClientRect){var s=this.getBoundingClientRect();o=b.clientX-s.left,p=b.clientY-s.top}return b.deltaX=l,b.deltaY=m,b.deltaFactor=f,b.offsetX=o,b.offsetY=p,b.deltaMode=0,h.unshift(b,j,l,m),e&&clearTimeout(e),e=setTimeout(c,200),(a.event.dispatch||a.event.handle).apply(this,h)}}function c(){f=null}function d(a,b){return k.settings.adjustOldDeltas&&"mousewheel"===a.type&&b%120===0}var e,f,g=["wheel","mousewheel","DOMMouseScroll","MozMousePixelScroll"],h="onwheel"in document||document.documentMode>=9?["wheel"]:["mousewheel","DomMouseScroll","MozMousePixelScroll"],i=Array.prototype.slice;if(a.event.fixHooks)for(var j=g.length;j;)a.event.fixHooks[g[--j]]=a.event.mouseHooks;var k=a.event.special.mousewheel={version:"3.1.12",setup:function(){if(this.addEventListener)for(var c=h.length;c;)this.addEventListener(h[--c],b,!1);else this.onmousewheel=b;a.data(this,"mousewheel-line-height",k.getLineHeight(this)),a.data(this,"mousewheel-page-height",k.getPageHeight(this))},teardown:function(){if(this.removeEventListener)for(var c=h.length;c;)this.removeEventListener(h[--c],b,!1);else this.onmousewheel=null;a.removeData(this,"mousewheel-line-height"),a.removeData(this,"mousewheel-page-height")},getLineHeight:function(b){var c=a(b),d=c["offsetParent"in a.fn?"offsetParent":"parent"]();return d.length||(d=a("body")),parseInt(d.css("fontSize"),10)||parseInt(c.css("fontSize"),10)||16},getPageHeight:function(b){return a(b).height()},settings:{adjustOldDeltas:!0,normalizeOffset:!0}};a.fn.extend({mousewheel:function(a){return a?this.bind("mousewheel",a):this.trigger("mousewheel")},unmousewheel:function(a){return this.unbind("mousewheel",a)}})});
+		</script>
+		<script>
+			// randomColor by David Merfield under the CC0 license
+			// https://github.com/davidmerfield/randomColor/
+			!function(r,e){if("function"==typeof define&&define.amd)define([],e);else if("object"==typeof exports){var n=e();"object"==typeof module&&module&&module.exports&&(exports=module.exports=n),exports.randomColor=n}else r.randomColor=e()}(this,function(){function r(r){var e=o(r.hue),n=i(e);return 0>n&&(n=360+n),n}function e(r,e){if("random"===e.luminosity)return i([0,100]);if("monochrome"===e.hue)return 0;var n=u(r),t=n[0],a=n[1];switch(e.luminosity){case"bright":t=55;break;case"dark":t=a-10;break;case"light":a=55}return i([t,a])}function n(r,e,n){var t=a(r,e),o=100;switch(n.luminosity){case"dark":o=t+20;break;case"light":t=(o+t)/2;break;case"random":t=0,o=100}return i([t,o])}function t(r,e){switch(e.format){case"hsvArray":return r;case"hslArray":return d(r);case"hsl":var n=d(r);return"hsl("+n[0]+", "+n[1]+"%, "+n[2]+"%)";case"hsla":var t=d(r);return"hsla("+t[0]+", "+t[1]+"%, "+t[2]+"%, "+Math.random()+")";case"rgbArray":return h(r);case"rgb":var a=h(r);return"rgb("+a.join(", ")+")";case"rgba":var o=h(r);return"rgba("+o.join(", ")+", "+Math.random()+")";default:return f(r)}}function a(r,e){for(var n=s(r).lowerBounds,t=0;t<n.length-1;t++){var a=n[t][0],o=n[t][1],u=n[t+1][0],i=n[t+1][1];if(e>=a&&u>=e){var f=(i-o)/(u-a),l=o-f*a;return f*e+l}}return 0}function o(r){if("number"==typeof parseInt(r)){var e=parseInt(r);if(360>e&&e>0)return[e,e]}if("string"==typeof r&&m[r]){var n=m[r];if(n.hueRange)return n.hueRange}return[0,360]}function u(r){return s(r).saturationRange}function s(r){r>=334&&360>=r&&(r-=360);for(var e in m){var n=m[e];if(n.hueRange&&r>=n.hueRange[0]&&r<=n.hueRange[1])return m[e]}return"Color not found"}function i(r){if(null===g)return Math.floor(r[0]+Math.random()*(r[1]+1-r[0]));var e=r[1]||1,n=r[0]||0;g=(9301*g+49297)%233280;var t=g/233280;return Math.floor(n+t*(e-n))}function f(r){function e(r){var e=r.toString(16);return 1==e.length?"0"+e:e}var n=h(r),t="#"+e(n[0])+e(n[1])+e(n[2]);return t}function l(r,e,n){var t=n[0][0],a=n[n.length-1][0],o=n[n.length-1][1],u=n[0][1];m[r]={hueRange:e,lowerBounds:n,saturationRange:[t,a],brightnessRange:[o,u]}}function c(){l("monochrome",null,[[0,0],[100,0]]),l("red",[-26,18],[[20,100],[30,92],[40,89],[50,85],[60,78],[70,70],[80,60],[90,55],[100,50]]),l("orange",[19,46],[[20,100],[30,93],[40,88],[50,86],[60,85],[70,70],[100,70]]),l("yellow",[47,62],[[25,100],[40,94],[50,89],[60,86],[70,84],[80,82],[90,80],[100,75]]),l("green",[63,178],[[30,100],[40,90],[50,85],[60,81],[70,74],[80,64],[90,50],[100,40]]),l("blue",[179,257],[[20,100],[30,86],[40,80],[50,74],[60,60],[70,52],[80,44],[90,39],[100,35]]),l("purple",[258,282],[[20,100],[30,87],[40,79],[50,70],[60,65],[70,59],[80,52],[90,45],[100,42]]),l("pink",[283,334],[[20,100],[30,90],[40,86],[60,84],[80,80],[90,75],[100,73]])}function h(r){var e=r[0];0===e&&(e=1),360===e&&(e=359),e/=360;var n=r[1]/100,t=r[2]/100,a=Math.floor(6*e),o=6*e-a,u=t*(1-n),s=t*(1-o*n),i=t*(1-(1-o)*n),f=256,l=256,c=256;switch(a){case 0:f=t,l=i,c=u;break;case 1:f=s,l=t,c=u;break;case 2:f=u,l=t,c=i;break;case 3:f=u,l=s,c=t;break;case 4:f=i,l=u,c=t;break;case 5:f=t,l=u,c=s}var h=[Math.floor(255*f),Math.floor(255*l),Math.floor(255*c)];return h}function d(r){var e=r[0],n=r[1]/100,t=r[2]/100,a=(2-n)*t;return[e,Math.round(n*t/(1>a?a:2-a)*1e4)/100,a/2*100]}function v(r){for(var e=0,n=0;n!==r.length&&!(e>=Number.MAX_SAFE_INTEGER);n++)e+=r.charCodeAt(n);return e}var g=null,m={};c();var b=function(a){if(a=a||{},void 0!==a.seed&&null!==a.seed&&a.seed===parseInt(a.seed,10))g=a.seed;else if("string"==typeof a.seed)g=v(a.seed);else{if(void 0!==a.seed&&null!==a.seed)throw new TypeError("The seed value must be an integer or string");g=null}var o,u,s;if(null!==a.count&&void 0!==a.count){var i=a.count,f=[];for(a.count=null;i>f.length;)g&&a.seed&&(a.seed+=1),f.push(b(a));return a.count=i,f}return o=r(a),u=e(o,a),s=n(o,u,a),t([o,u,s],a)};return b});
+		</script>
+		
+		<style>
+			.imgholder{
+				display:inline-block;
+			}
+			td{
+				border: 1px solid black;
+			}			
+			table{
+				position:absolute;
+				pointer-events: none;
+				border-collapse: collapse;
+				border-spacing: 0;
+			}
+			.svgDiv{
+				position:absolute;
+				pointer-events: none;
+			}
+			circle{
+				z-index: 10;
+			}
+			img{ 
+				image-rendering: optimizeSpeed;             /* STOP SMOOTHING, GIVE ME SPEED  */
+				image-rendering: -moz-crisp-edges;          /* Firefox                        */
+				image-rendering: -o-crisp-edges;            /* Opera                          */
+				image-rendering: -webkit-optimize-contrast; /* Chrome (and eventually Safari) */
+				image-rendering: pixelated; 				/* Chrome, CSS3 standard*/
+				image-rendering: optimize-contrast;         /* CSS3 Proposed                  */
+				-ms-interpolation-mode: nearest-neighbor;   /* IE8+                           */
+			}
+			.zoomMatch{
+				position:absolute;
+			}
+		</style>				
+	</head>
+	<body>
+		<div id="container" style="margin:15px">
+			<h3 id="title" class="text-muted">""</h3>
+			<div id="imgContainer" style="height:640px">
+				<div class="imgholder">
+					<h4 id="refImgTitle" class="text-muted imgTile">""</h4>
+					<div id="refImgDiv" class="imgDiv"></div>
+				</div>
+				<div class="imgholder">
+					<h4 class="text-muted imgTile">""</h4>
+					<div id="fixImgDiv" class="imgDiv"></div>
+				</div>
+			</div>			
+		</div>
+
+		<div class="btn-group" style="margin-left:15px">
+			<button id="nextImgBtn" type="button" class="btn btn-default finished">Next Image  <span class="glyphicon glyphicon-step-forward"></span></button>    
+			<!-- <button id="showPointsBtn" type="button" class="btn btn-default finished">Show Points  <span class="glyphicon glyphicon-eye-open"></span></button> -->
+			<div class="btn-group">
+				<button type="button" class="btn btn-default dropdown-toggle finished" data-toggle="dropdown">Skip  <span class="glyphicon glyphicon-chevron-down"></span></button>
+				<ul id="skipList" class="dropdown-menu" role="menu">
+					<li><a href="#">Too much cloud</a></li>
+					<li><a href="#">Bad lines</a></li>
+				</ul>
+			</div>
+			<button id="pointsBtn" type="button" class="btn btn-default disabled">Points: 0</button>
+			<button id="imagesBtn"  type="button" class="btn btn-default disabled">Image:</button> 
+			<a id="downLoad" class="btn btn-default disabled" role="button">Download Tie Points</a> <!-- btn-lg-->
+		</div>
+		
+ 		<table id="refImgGrid"> <!--  style="display:none" -->
+			<tr>
+				<td></td><td></td><td></td><td></td>
+			</tr>
+			<tr>
+				<td></td><td></td><td></td><td></td>
+			</tr>
+			<tr>
+				<td></td><td></td><td></td><td></td>
+			</tr>
+			<tr>
+				<td></td><td></td><td></td><td></td>
+			</tr>
+		</table>
+		<table id="fixImgGrid"> <!--  style="display:none" -->
+			<tr>
+				<td></td><td></td><td></td><td></td>
+			</tr>
+			<tr>
+				<td></td><td></td><td></td><td></td>
+			</tr>
+			<tr>
+				<td></td><td></td><td></td><td></td>
+			</tr>
+			<tr>
+				<td></td><td></td><td></td><td></td>
+			</tr>
+		</table>
+		<div id="refSvgDiv" class="svgDiv">
+			<svg id="refSvg"></svg>
+		</div>
+		<div id="fixSvgDiv" class="svgDiv">
+			<svg id="fixSvg"></svg>
+		</div>	
+
+		<script>		
+			//#################################################################################################################################
+			//##############GLOBAL VARIABLES##############
+			//#################################################################################################################################
+			
+			var current = 0;
+			var point = 0;
+			var itpInfo = [];
+			var done = {"ref":0,"fix":0}
+			var color = randomColor();
+			//var zoomOut = 0
+
+			//#################################################################################################################################
+			//##############FUNCTIONS##############
+			//#################################################################################################################################
+			
+			function setPosition(refDiv, setObj, type){
+				var obj = $('#'+refDiv);
+				var refHeight = obj[0].getBoundingClientRect().height;
+				var refWidth = obj[0].getBoundingClientRect().width;
+				var refOffset = obj.offset();
+				console.log("width: "+refWidth)
+				if(type == "table"){
+					//$('#'+setObj).height(refHeight).width(refWidth).css({"top":refOffset.top,"left":refOffset.left});
+					$('#'+setObj).height(refHeight-1).width(refWidth-1).css({"top":refOffset.top,"left":refOffset.left});
+				} else if(type == "div"){
+					$('#'+setObj).height(refHeight).width(refWidth).css({"top":refOffset.top,"left":refOffset.left});
+					if (setObj.indexOf("ref") >= 0){$("#refSvg").attr({"height":refHeight, "width":refWidth})} else
+					if (setObj.indexOf("fix") >= 0){$("#fixSvg").attr({"height":refHeight, "width":refWidth})}
+				}				
+			}
+			
+			function getImgId(path){
+				var bname = path.split(/[\\/]/).pop();
+				var imgID = bname.substring(0, 16);
+				return imgID;
+			}
+			
+			function loadImg(imgSrc, type){
+				//set variables depending on imgSrc type ("ref"(default) or "fix")
+				var imgDiv = "refImgDiv";
+				var imgGrid = "refImgGrid";
+				var svgDiv = "refSvgDiv";
+				var title = "Reference Image: ";
+				var id = "refImg";
+				if(type == "fix"){
+					imgDiv = "fixImgDiv";
+					imgGrid = "fixImgGrid";
+					svgDiv = "fixSvgDiv";
+					title = "Fix Image: ";
+					id = "fixImg";
+				}
+				
+				//title the image
+				var imgId = getImgId(imgSrc);				
+				$("#"+imgDiv).siblings("h4").text(title+imgId);
+				
+				//append the image, the grid, and the svg
+				$("#"+imgDiv).append('<img id='+id+' src='+imgSrc+' width=auto height=600px>') //class="zoomImg" 
+				//.zoom({url:imgSrc, magnify:1, duration: 50})
+				.imagesLoaded(function(){
+					setPosition(imgDiv, imgGrid, "table");
+					setPosition(imgDiv, svgDiv, "div");
+					$("#"+imgGrid).show();
+				});	
+								
+				wheelzoom(document.getElementById(id), {zoom:0.3});
+			}
+			
+			function makeSVG(tag, attrs) {
+				var el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+				for(var k in attrs){el.setAttribute(k, attrs[k])};
+				return el;
+			}
+			
+			function appendCircle(el, e){
+				var parentOffset = el.offset();
+				var relX = e.pageX - parentOffset.left;
+				var relY = e.pageY - parentOffset.top;
+				var circle = makeSVG("circle", {cx:relX, cy:relY, r:5, fill:"#00d27f"}); //color[point]
+				if(el.attr('id') == "refImgDiv"){var imgId = "refImg"} else {var imgId = "fixImg"}
+				var bckgrdPos = $("#"+imgId).css("background-position").split(" ");
+				var bckgrdSiz = $("#"+imgId).css("background-size").split(" ");
+				var xPos = parseFloat(bckgrdPos[0]);
+				var yPos = parseFloat(bckgrdPos[1]);
+				var xSiz = parseFloat(bckgrdSiz[0]);
+				var ySiz = parseFloat(bckgrdSiz[1]);
+				var yZoom = (relY + Math.abs(yPos))/ySiz
+				var xZoom = (relX + Math.abs(xPos))/xSiz
+	
+				if (el.context.id.indexOf("ref") >= 0){
+					if(done.ref == 0){
+						document.getElementById("refSvg").appendChild(circle);						
+						//var row = relY * (itpInfo[current].ref.origSize.rows/itpInfo[current].ref.smallSize.rows);
+						//var col = relX * (itpInfo[current].ref.origSize.cols/itpInfo[current].ref.smallSize.cols);
+						var row = yZoom * itpInfo[current].ref.origSize.rows;
+						var col = xZoom * itpInfo[current].ref.origSize.cols;
+												
+						itpInfo[current].ref.point.push({"row":row,"col":col});
+						done.ref = 1
+						
+						
+						//itpInfo[current].ref.point[point].row = row;
+						//itpInfo[current].ref.point[point].col = col;
+					
+					} else if(done.fix == 0){
+						alert('Please identify a corresponding point in the "Fix Image"')
+					}					
+				} else if (el.context.id.indexOf("fix") >= 0){
+					if(done.fix == 0){
+						document.getElementById("fixSvg").appendChild(circle);
+						var row = yZoom * itpInfo[current].fix.origSize.rows;
+						var col = xZoom * itpInfo[current].fix.origSize.cols;
+						
+						itpInfo[current].fix.point.push({"row":row,"col":col});
+						done.fix = 1
+						
+						//itpInfo[current].fix.point[point].row = row;
+						//itpInfo[current].fix.point[point].col = col;
+					} else if(done.ref == 0){
+						alert('Please identify a corresponding point in the "Reference Image"')
+					} 
+				}
+				
+				console.log("row: "+row)
+				console.log("col: "+col)
+				
+				if(done.ref == 1 && done.fix == 1){
+					point += 1;
+					done.ref = 0;
+					done.fix = 0;
+					color = randomColor();
+					$("svg circle").fadeOut(2000); //, function(){$(this).remove();});
+					$("#pointsBtn").text("Points: "+point)
+				}
+				//if(point == 3){
+				//	point = 0;
+				//	current += 1;
+				//	if(current == info.fixInfo.imgFile.length){
+				//		var data = "text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(itpInfo));
+				//		$("#downLoad").attr({href:"data:" + data, download:"data.json"}).removeClass("disabled btn-default").addClass("btn-success");
+				//		$(".imgDiv").empty();
+				//		$("svg").empty();
+				//	} else{
+				//		$(".imgDiv").empty();
+				//		$("svg").empty();
+				//		loadImg(info.refInfo.imgFile, "ref");
+				//		loadImg(info.fixInfo.imgFile[current], "fix");
+				//	}
+				//}	
+			}
+					
+			//create the info json object to store coordinate info and be run through R
+			function createItpInfo(){						
+				info.fixInfo.imgFile.forEach(function(e, i){
+					itpInfo.push({"ref":{"file":"","point":[],"origSize":{"rows":0,"cols":0},"medSize":{"rows":0,"cols":0},"smallSize":{"rows":0,"cols":0}}, "fix":{"file":"","point":[],"origSize":{"rows":0,"cols":0},"medSize":{"rows":0,"cols":0},"smallSize":{"rows":0,"cols":0}}, "process":1, "note":"No problem"});
+					//move some info from the R json output to the the js json output 
+					//reference file info
+					itpInfo[i].ref.file = info.refInfo.origFile;		
+					itpInfo[i].ref.origSize.rows = info.refInfo.origRows
+					itpInfo[i].ref.origSize.cols = info.refInfo.origCols
+					itpInfo[i].ref.medSize.rows = info.refInfo.imgRows
+					itpInfo[i].ref.medSize.cols = info.refInfo.imgCols
+					itpInfo[i].ref.smallSize.cols = info.refInfo.imgCols * (600/info.refInfo.imgRows)
+					itpInfo[i].ref.smallSize.rows = 600
+								
+					//fix files info
+					itpInfo[i].fix.file = info.fixInfo.origFile[i];
+					itpInfo[i].fix.origSize.rows = info.fixInfo.origRows[i]
+					itpInfo[i].fix.origSize.cols = info.fixInfo.origCols[i]
+					itpInfo[i].fix.medSize.rows = info.fixInfo.imgRows[i]
+					itpInfo[i].fix.medSize.cols = info.fixInfo.imgCols[i]
+					itpInfo[i].fix.smallSize.cols = info.fixInfo.imgCols[i] * (600/info.fixInfo.imgRows[i])
+					itpInfo[i].fix.smallSize.rows = 600
+					//push 3 point row and col objects
+					//for(p=0;p<3;p++){
+					//	itpInfo[i].ref.point.push({"row":0,"col":0});
+					//	itpInfo[i].fix.point.push({"row":0,"col":0});
+					//}
+				});
+			}
+			
+			function setTitle(){
+				var imgId = getImgId(info.refInfo.imgFile);
+				var wrs = 1;
+				if(imgId.substring(2, 3) > 3){wrs = 2};
+				var pathRowId  = imgId.substring(3, 6)+"/"+imgId.substring(6, 9);
+				var title = "WRS-"+wrs+" Path/Row: "+pathRowId;
+				$("#title").text(title);
+			}
+			
+			function makeJsonName(){
+				var imgId = getImgId(info.refInfo.imgFile);
+				var wrs = 1;
+				if(imgId.substring(2, 3) > 3){wrs = 2};
+				var fname = "wrs"+wrs+"_"+imgId.substring(3, 6)+imgId.substring(6, 9)+"_tie_points.json";
+				return fname
+			}
+						
+			function imageBtnText(){
+				$("#imagesBtn").text("Image: "+(current+1)+"/"+info.fixInfo.imgFile.length);
+			}
+			
+			function imgAdvance(){
+				point = 0;
+				current += 1;
+				$(".imgDiv").empty();
+				$("svg").empty();
+				if(current == info.fixInfo.imgFile.length){
+					var data = "text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(itpInfo));						
+					$("#downLoad").attr({href:"data:" + data, download:makeJsonName()}).removeClass("disabled btn-default").addClass("btn-success"); //"data.json"
+					$(".finished").addClass("disabled");
+					$(".imgTile").text("")
+					$("#refImgTitle").text('Done! Click the green "Download Tie Points" button below.')
+					$
+				} else{
+					$(".imgDiv").empty();
+					$("svg").empty();
+					imageBtnText()
+					$("#pointsBtn").text("Points: "+point)
+					loadImg(info.refInfo.imgFile, "ref");
+					loadImg(info.fixInfo.imgFile[current], "fix");
+				}								
+			}
+			
+			
+			//#################################################################################################################################
+			//##############LISTENERS##############
+			//#################################################################################################################################
+			
+			//load the first set of images when the window loads
+			$(window).load(function(){
+				setTitle(info.refInfo.imgFile);
+				loadImg(info.refInfo.imgFile, "ref");
+				loadImg(info.fixInfo.imgFile[current], "fix");
+				imageBtnText()			
+				createItpInfo();				
+			})
+			
+			$(".imgDiv").dblclick(function(e){
+				appendCircle($(this), e, point)
+			});
+			
+			$("#skipList li").click(function(){
+				itpInfo[current].process = 0;				
+				itpInfo[current].note = $(this).text().toLowerCase();
+				imgAdvance();
+			});
+					
+			$("#nextImgBtn").click(function(){
+				console.log(point);
+				if(point < 3){alert("Can't load the next image until you have at least 3 points. If you can't add points, then skip the image")} else{
+					imgAdvance();
+				}
+			});
+			
+
+			//$(document).on("mousewheel","img",function(){
+			//	if(zoomOut == 1){$("svg circle").fadeOut(1500);}
+			//	zoomOut = 0;							
+			//})
+			
+			//$("#showPointsBtn").click(function(){
+			//	var refSiz = Math.floor(itpInfo[current].ref.smallSize.cols)+"px"+" "+Math.floor(itpInfo[current].ref.smallSize.rows)+"px";
+			//	var fixSiz = Math.floor(itpInfo[current].fix.smallSize.cols)+"px"+" "+Math.floor(itpInfo[current].fix.smallSize.rows)+"px";
+			//	$("#refImg").css({"background-position":"0px 0px","background-size":refSiz});
+			//	$("#fixImg").css({"background-position":"0px 0px","background-size":fixSiz});
+			//	$("svg circle").fadeIn(500);
+			//	document.getElementById("refImg").dispatchEvent(new CustomEvent('wheelzoom.destroy'));
+			//	wheelzoom(document.getElementById("refImg"), {zoom:0.3});
+			//	document.getElementById("fixImg").dispatchEvent(new CustomEvent('wheelzoom.destroy'));
+			//	wheelzoom(document.getElementById("fixImg"), {zoom:0.3});
+			//	zoomOut = 1;
+			//})
+				
+		</script>	
+	</body>
+</html>
