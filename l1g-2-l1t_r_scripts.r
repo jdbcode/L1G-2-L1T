@@ -505,16 +505,18 @@ l1g2l1t_warp = function(reffile, fixfile, mode){
   info = info[these,]
   
   #filter points based on rmse contribution
-  maxr = endit = 10
-  while(maxr >2 & endit != 0){
-    rmse = calc_rmse(info,reso)
-    if (rmse$total_rmse != 0){contr = rmse$r/rmse$total_rmse} else contr = rmse$r #error contribution of each point
-    maxr = max(contr) #while loop controler
-    b = which(contr < 2) #subset finder - is point 2 times or greater in contribution
-    info = info[b,] #subset the info based on good rsme
-    endit = sum(contr[b]) #while loop controler
+  if(mode != "rmse"){
+    maxr = endit = 10
+    while(maxr >2 & endit != 0){
+      rmse = calc_rmse(info,reso)
+      if (rmse$total_rmse != 0){contr = rmse$r/rmse$total_rmse} else contr = rmse$r #error contribution of each point
+      maxr = max(contr) #while loop controler
+      b = which(contr < 2) #subset finder - is point 2 times or greater in contribution
+      info = info[b,] #subset the info based on good rsme
+      endit = sum(contr[b]) #while loop controler
+    }
   }
-  
+    
   #if the number of sample points is less than 10 delete the image and return
   if(nrow(info) < 10){
     if(mode != "rmse"){
