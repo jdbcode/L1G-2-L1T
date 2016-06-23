@@ -95,6 +95,20 @@ initial_warp = function(json){
     gdalwarp_cmd = paste("gdalwarp -of Gtiff -ot Byte -srcnodata 0 -dstnodata 0 -co INTERLEAVE=BAND -overwrite -multi -tps -tr", 60, 60, tempname, outname) #fixfile   "-tps"  "-order 2", "-order 3" 
     system(gdalwarp_cmd)
     
+    origsize = file.info(fixFile)$size
+    warpsize = file.info(outname)$size
+    ratio = warpsize/origsize
+    if(ratio > 1.5 | ratio < 0.5){
+      dname = dirname(fixFile)
+      dnamenew = paste(dname,"_NO_L1G2L1T", sep="")
+      file.rename(dname,dnamenew)
+      outfile = file.path(dnamenew,sub("archv.tif", "no_l1g2l1t.txt",basename(fixFile)))
+      write("weird warp - selected points may be incorrect", outfile)
+      file.path(dnamenew,basename(tempname))
+      unlink(c(file.path(dnamenew,basename(tempname)),file.path(dnamenew,basename(outname))))
+      next()
+    }
+    
     unlink(tempname)
   }
 }
@@ -231,11 +245,9 @@ l1g2l1t_warp = function(reffile, fixfile, mode){
     xresid = (info[,"refx"]-info[,"fixx"])^2 #get the residuals of each x
     yresid = (info[,"refy"]-info[,"fixy"])^2 #get the residuals of each y
     r = (sqrt(xresid+yresid))/reso #get the rmse of each xy point
-    totx = (1/length(info[,"refx"]))*(sum(xresid)) #intermediate step 
-    toty = (1/length(info[,"refy"]))*(sum(yresid)) #intermediate step
-    x_rmse = sqrt(totx)/reso
-    y_rmse = sqrt(toty)/reso
-    total_rmse = sqrt(totx+toty)/reso #total rmse including all points
+    x_rmse = sqrt(mean(xresid))/reso
+    y_rmse = sqrt(mean(yresid))/reso
+    total_rmse = sqrt((x_rmse^2)+(y_rmse^2)) #total rmse including all points
     rmse_info = list(x_rmse=x_rmse, y_rmse=y_rmse, total_rmse=total_rmse, r=r)
     return(rmse_info)
   }
@@ -506,15 +518,25 @@ l1g2l1t_warp = function(reffile, fixfile, mode){
   
   #filter points based on rmse contribution
   if(mode != "rmse"){
-    maxr = endit = 10
-    while(maxr >2 & endit != 0){
-      rmse = calc_rmse(info,reso)
-      if (rmse$total_rmse != 0){contr = rmse$r/rmse$total_rmse} else contr = rmse$r #error contribution of each point
-      maxr = max(contr) #while loop controler
-      b = which(contr < 2) #subset finder - is point 2 times or greater in contribution
-      info = info[b,] #subset the info based on good rsme
-      endit = sum(contr[b]) #while loop controler
-    }
+    rmse = calc_rmse(info,reso)
+    r = rmse$r
+    sdr = sd(r)
+    meanr = mean(r)
+    limit = meanr+sdr*2
+    goods = which(r <= limit)
+    n_outliers = nrow(info)-length(goods)
+    info = info[goods,]
+    print(paste("getting rid of:",n_outliers,"outliers"))
+    print(paste("there are still:",nrow(info),"points"))
+    #maxr = endit = 10
+    #while(maxr >2 & endit != 0){
+    #  rmse = calc_rmse(info,reso)
+    #  if (rmse$total_rmse != 0){contr = rmse$r/rmse$total_rmse} else contr = rmse$r #error contribution of each point
+    #  maxr = max(contr) #while loop controler
+    #  b = which(contr < 2) #subset finder - is point 2 times or greater in contribution
+    #  info = info[b,] #subset the info based on good rsme
+    #  endit = sum(contr[b]) #while loop controler
+    #}
   }
     
   #if the number of sample points is less than 10 delete the image and return
