@@ -98,7 +98,7 @@ initial_warp = function(json){
     origsize = file.info(fixFile)$size
     warpsize = file.info(outname)$size
     ratio = warpsize/origsize
-    if(ratio > 1.5 | ratio < 0.5){
+    if(ratio > 1.1 | ratio < 0.8){
       dname = dirname(fixFile)
       dnamenew = paste(dname,"_NO_L1G2L1T", sep="")
       file.rename(dname,dnamenew)
