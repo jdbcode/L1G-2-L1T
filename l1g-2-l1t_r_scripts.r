@@ -7,6 +7,7 @@ library(rjson)
 
 make_tiepoint_img = function(imgfile,outdir){
   img = brick(imgfile)
+  img[is.na(img)] = 0
   rows = nrow(img)
   cols = ncol(img)
   newrows = ceiling(1 * rows) #0.4
@@ -265,12 +266,13 @@ l1g2l1t_warp = function(reffile, fixfile, mode){
   }
   
   #read in the fix image
-  fiximg = raster(fixfile, band=3) #load the fix image
+  fiximg = raster(fixfile, band=4) #load the fix image
   origfiximg = fiximg #save a copy of the original fix image
   fiximgb1 = raster(fixfile, band=1)
+  fiximgb4 = raster(fixfile, band=4)
   
   #load the ref image
-  refimg = raster(reffile, 3) 
+  refimg = raster(reffile, 4) 
   
   #make sure that the ref and fix img are croppd to eachother
   refimg = intersect(refimg, fiximg)
@@ -296,25 +298,27 @@ l1g2l1t_warp = function(reffile, fixfile, mode){
   #sample the the reference image, laying down a regular grid of points to check
   #s = sampleRegular(refimg, sample, cells=T)
   #s = sampleRandom(refimg, 10000, cells=T)
-  s = sampleRegular(refimg, 10000, cells=T)
-  s = s[,1]
+  s = sampleRegular(refimg, 15000, cells=T)[,1]
+  #s = s[,1]
   xy = xyFromCell(refimg,s) #[,1] #get the xy coordinates for each good point
   
   #filter points in fiximg that fall on clouds
-  theseones = cellFromXY(fiximgb1, xy)   #get fiximg cell index for sample 
-  theseones = na.omit(theseones)
-  a = fiximgb1[theseones] #extract values for fiximg cell sample
-  b = which(fiximgb1[theseones] < 100) # fiximgb1[theseones] != NA) #exclude points that don't meet criteria
+  thesecells = na.omit(cellFromXY(fiximgb1, xy))   #get fiximg cell index for sample 
+  #theseones = na.omit(theseones)
+  #a = fiximgb1[theseones] #extract values for fiximg cell sample
+  b = which(fiximgb1[thesecells] < 100 & fiximgb4[thesecells] > 30) # fiximgb1[theseones] != NA) #exclude points that don't meet criteria
   
   #if the number of sample points is less than 10 delete the image return
-  if(length(b) < 10){
-    delete_files(fixfile, 2)
-    return(0)
-  }
+  #if(length(b) < 10){
+  #  delete_files(fixfile, 2)
+  #  return(0)
+  #}
   
   #subset the sample
+  n_samp = length(b)
+  print(paste("n points from original sample:",n_samp))
   n_subsamp = 1000
-  if(length(b) < n_subsamp){n_subsamp = length(b)}
+  if(n_samp < n_subsamp){n_subsamp = n_samp}
   subsamp = sample(b, n_subsamp)
   xy = xy[subsamp,] #subset the original sample
   s = s[subsamp] #subset the original sample
@@ -334,6 +338,7 @@ l1g2l1t_warp = function(reffile, fixfile, mode){
   #iterate process of creating a similarity surface for each check point in the sample
   window_size = c(101,201,275)
   for(size in 1:3){
+    print(paste("working on window size set: ",size,"/3",sep=""))
     if(mode != "rmse"){
       if(size == 1){pdf_file = sub("archv_l1g_warp.tif", "ccc_surface_100w.pdf",fixfile)}
       if(size == 2){pdf_file = sub("archv_l1g_warp.tif", "ccc_surface_200w.pdf",fixfile)}
@@ -353,7 +358,7 @@ l1g2l1t_warp = function(reffile, fixfile, mode){
     for(point in 1:length(info[,1])){ 
       #print(point) #print the point so we know where we're at
       if(info[point,"decision"] == 1){
-        print("already good, skipping...")
+      #  print("already good, skipping...")
         next
       }
       if(size == 1){info[point,"point"] = point} #info[point,1] = point #put the point number into the info table
@@ -471,7 +476,7 @@ l1g2l1t_warp = function(reffile, fixfile, mode){
       #title = paste(point,info$nmax[point],info$max[point],info$edgedist[point], info$decision[point], sep = ",")
       if(info[point,"decision"] == 1){status = "accept"} else {status = "reject"}
       title = paste("Point:", point, status)
-      print(title)
+      #print(title)
       if(mode != "rmse"){
         ccc = ccc[nrow(ccc):1,]
         persp(x, y, ccc, theta = 30, phi = 30, expand = 0.5, col = 8, main=title)
