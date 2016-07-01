@@ -354,7 +354,7 @@ l1g2l1t_warp = function(reffile, fixfile, mode){
     radius = floor(window/2) #radius of the window in pixels
     nrc = search+(radius*2) #the reference extent length to slide over
     
-    print(paste("n goods =",length(which(info[,"decision"] == 1))))
+    
     for(point in 1:length(info[,1])){ 
       #print(point) #print the point so we know where we're at
       if(info[point,"decision"] == 1){
@@ -482,12 +482,12 @@ l1g2l1t_warp = function(reffile, fixfile, mode){
         persp(x, y, ccc, theta = 30, phi = 30, expand = 0.5, col = 8, main=title)
       }
     }
-    
+    print(paste("n goods =",length(which(info[,"decision"] == 1))))
     if(mode != "rmse"){
       dev.off() #turn off the plotting device
     }
   }
-  print(paste("n goods =",length(which(info[,"decision"] == 1))))
+  #print(paste("n goods =",length(which(info[,"decision"] == 1))))
   
   #write all the point info to a file
   if(mode != "rmse"){
@@ -510,10 +510,10 @@ l1g2l1t_warp = function(reffile, fixfile, mode){
       dname = dirname(fixfile)
       newdname = paste(dname,"_NO_L1G2L1T", sep="")
       file.rename(dname,newdname)
-      outfile = sub("archv_l1g_warp.tif", "no_l1g2l1t.txt",fixfile)
+      outfile = file.path(newdname,sub("archv_l1g_warp.tif", "no_l1g2l1t.txt",basename(fixfile)))
       write("cant find enought points", outfile)
     } else{
-      save(rmse_info, rmse_outfile)
+      save(rmse_info, file = rmse_outfile)
     }
     return()
   }
@@ -554,7 +554,7 @@ l1g2l1t_warp = function(reffile, fixfile, mode){
       write("cant find enought points", outfile)
     } else{
       rmse_info$info = info
-      save(rmse_info, rmse_outfile)
+      save(rmse_info, file = rmse_outfile)
     }
     return()
   }
