@@ -415,15 +415,6 @@
 			$(window).load(function(){
 				$("#l1g2l1tGuideModal").modal("show");
 				setTitle(info.refInfo.imgFile);
-				//make sure that everything is an array, it will not be if there is only one image to be fixed
-				if(typeof info.fixInfo.imgFile == "string"){
-					info.fixInfo.origFile = [info.fixInfo.origFile]
-					info.fixInfo.imgFile = [info.fixInfo.imgFile]
-					info.fixInfo.origRows = [info.fixInfo.origRows]
-					info.fixInfo.origCols = [info.fixInfo.origCols]
-					info.fixInfo.imgRows = [info.fixInfo.imgRows]
-					info.fixInfo.imgCols = [info.fixInfo.imgCols]
-				}
 				loadImg(info.refInfo.imgFile, "ref");
 				loadImg(info.fixInfo.imgFile[current], "fix");
 				imageBtnText();			

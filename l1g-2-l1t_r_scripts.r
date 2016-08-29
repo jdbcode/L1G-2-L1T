@@ -23,7 +23,7 @@ make_tiepoint_img = function(imgfile,outdir){
 }
 
 
-loop_tie_points = function(reffile, reffiles, outdir){
+loop_tie_points = function(reffile, fixfiles, outdir){
   print("preparing reference image...")
   refInfo = make_tiepoint_img(reffile,outdir)
   len = length(fixfiles)
@@ -93,7 +93,7 @@ initial_warp = function(json){
     system(gdaltrans_cmd)
     
     outname = sub("archv.tif", "archv_l1g_warp.tif", fixFile)
-    gdalwarp_cmd = paste("gdalwarp -of Gtiff -ot Byte -srcnodata 0 -dstnodata 0 -co INTERLEAVE=BAND -overwrite -multi -tps -tr", 60, 60, tempname, outname) #fixfile   "-tps"  "-order 2", "-order 3" 
+    gdalwarp_cmd = paste("gdalwarp -of Gtiff -ot Byte -srcnodata 0 -dstnodata 0 -co INTERLEAVE=BAND -overwrite -multi -order 1 -tr", 60, 60, tempname, outname) #fixfile   "-tps"  "-order 2", "-order 3" 
     system(gdalwarp_cmd)
     
     origsize = file.info(fixFile)$size
@@ -218,7 +218,37 @@ l1g2l1t_unpack = function(file, proj){
 }
 
 
-l1g2l1t_warp = function(reffile, fixfile, mode){
+run_l1g2l1t_warp = function(tpfile){
+  data = fromJSON(file = tpfile)
+  len = length(data)
+  for(i in 1:len){
+    print(paste("working on file: ",i,"/",len,sep=""))
+    d = data[[i]]
+    fixFile = d$fix$file
+    if(d$process == 0){
+      dname = dirname(fixFile)
+      dnamenew = paste(dname,"_NO_L1G2L1T", sep="")
+      file.rename(dname,dnamenew)
+      outfile = file.path(dnamenew,sub("archv.tif", "no_l1g2l1t.txt",basename(fixFile)))
+      write(d$note, outfile)
+      next()
+    }
+    
+    r = raster(d$ref$file)
+    refX = xFromCol(r, d$ref$point[[1]]$col)
+    refY = yFromRow(r, d$ref$point[[1]]$row)
+    r = raster(d$fix$file)
+    fixX = xFromCol(r, d$fix$point[[1]]$col)
+    fixY = yFromRow(r, d$fix$point[[1]]$row)
+    
+    refstart=c(refX,refY)
+    fixstart=c(fixX,fixY)
+    l1g2l1t_warp(d$ref$file, d$fix$file, refstart, fixstart, mode="warp")
+  }
+}
+
+
+l1g2l1t_warp = function(reffile, fixfile, refstart=c(0,0), fixstart=c(0,0), mode){
   
   #set default parameters
   search=35 #27 
@@ -253,7 +283,7 @@ l1g2l1t_warp = function(reffile, fixfile, mode){
     return(rmse_info)
   }
   
-  make_gdaltrans_cmd = function(info, wktfile, fixfile, tempname){
+  make_gdaltrans_opts = function(info, wktfile, fixfile, tempname){
     info[,"refx"] = info[,"refx"]+(reso/2)
     info[,"refy"] = info[,"refy"]-(reso/2)
     fixcol = paste(info[,"fixcol"]) #fix col for tie point
@@ -261,15 +291,19 @@ l1g2l1t_warp = function(reffile, fixfile, mode){
     refx = paste(round(info[,"refx"]))  #fix x tie point coord 
     refy = paste(round(info[,"refy"]))  #fix y tie point coord
     gcpstr = paste(" -gcp", fixcol, fixrow, refx, refy, collapse="")
-    gdaltrans_cmd = paste("gdal_translate -of Gtiff -ot Byte -co INTERLEAVE=BAND -a_srs", wktfile, fixfile, tempname, gcpstr)
+    gdaltrans_cmd = paste("-of Gtiff -ot Byte -co INTERLEAVE=BAND -a_srs", wktfile, gcpstr, fixfile, tempname)
     return(gdaltrans_cmd)
   }
   
+  
   #read in the fix image
-  fiximg = raster(fixfile, band=4) #load the fix image
-  origfiximg = fiximg #save a copy of the original fix image
-  fiximgb1 = raster(fixfile, band=1)
-  fiximgb4 = raster(fixfile, band=4)
+  #fiximg = raster(fixfile, band=4) #load the fix image
+  fiximg = brick(fixfile) #load the fix image
+  origfiximg = subset(fiximg, subset=4) #save a copy of the original fix image so that the tie point coords can be assigned to the original row and cols
+  
+  #shift the fiximg if there is an initial offset provided
+  shiftit = refstart - fixstart
+  if(sum(shiftit) != 0){fiximg = shift(fiximg, x=shiftit[1], y=shiftit[2])}
   
   #load the ref image
   refimg = raster(reffile, 4) 
@@ -277,6 +311,14 @@ l1g2l1t_warp = function(reffile, fixfile, mode){
   #make sure that the ref and fix img are croppd to eachother
   refimg = intersect(refimg, fiximg)
   fiximg = intersect(fiximg, refimg)
+  
+  #fiximgb1 = raster(fixfile, band=1)
+  #fiximgb4 = raster(fixfile, band=4)
+  #get bands 1 and 4 out for cloud and shadow id in the fix image, as well as for cross correlation with the reference image
+  fiximgb1 = subset(fiximg, subset=1)
+  fiximgb4 = subset(fiximg, subset=4)
+  fiximg = fiximgb4 #need to copy because fiximg will be scaled, but we also need an unalted copy to find shadows in
+
   
   #calculate similarity index input values from the fix image subset
   values(fiximg) = scaleit(values(fiximg))
@@ -292,23 +334,18 @@ l1g2l1t_warp = function(reffile, fixfile, mode){
   
   #adjust the window and search size so that they are odd numbers
   if (search %% 2 == 0){search = search+1}
-  #radius = floor(window/2) #radius of the window in pixels
-  #nrc = search+(radius*2) #the reference extent length to slide over
-  
+
   #sample the the reference image, laying down a regular grid of points to check
-  #s = sampleRegular(refimg, sample, cells=T)
-  #s = sampleRandom(refimg, 10000, cells=T)
   s = sampleRegular(refimg, 15000, cells=T)[,1]
-  #s = s[,1]
   xy = xyFromCell(refimg,s) #[,1] #get the xy coordinates for each good point
   
   #filter points in fiximg that fall on clouds
   thesecells = na.omit(cellFromXY(fiximgb1, xy))   #get fiximg cell index for sample 
-  #theseones = na.omit(theseones)
-  #a = fiximgb1[theseones] #extract values for fiximg cell sample
   b = which(fiximgb1[thesecells] < 100 & fiximgb4[thesecells] > 30) # fiximgb1[theseones] != NA) #exclude points that don't meet criteria
   
   #if the number of sample points is less than 10 delete the image return
+  
+  #TODO - get out if there are not enough points to work with - there are examples of for doing this below
   #if(length(b) < 10){
   #  delete_files(fixfile, 2)
   #  return(0)
@@ -329,20 +366,14 @@ l1g2l1t_warp = function(reffile, fixfile, mode){
   cnames = c("point","refx","refy","refcol","refrow","fixx","fixy","fixcol","fixrow","nmax", "max","edgedist","decision")
   colnames(info) = cnames
   
-  #start a pdf file to hold image chips and similarity surfaces
-  #pdf_file = sub("archv_l1g_warp.tif", "ccc_surface.pdf",fixfile)
-  #unlink(pdf_file) #delete the pdf if it exists
-  #pdf(file=pdf_file, width=10, heigh=7) #size of the pdf page
-  #par(mfrow=c(2,3)) #number of trajectories to place on a page (columns, rows)
-  
   #iterate process of creating a similarity surface for each check point in the sample
   window_size = c(101,201,275)
   for(size in 1:3){
     print(paste("working on window size set: ",size,"/3",sep=""))
     if(mode != "rmse"){
-      if(size == 1){pdf_file = sub("archv_l1g_warp.tif", "ccc_surface_100w.pdf",fixfile)}
-      if(size == 2){pdf_file = sub("archv_l1g_warp.tif", "ccc_surface_200w.pdf",fixfile)}
-      if(size == 3){pdf_file = sub("archv_l1g_warp.tif", "ccc_surface_275w.pdf",fixfile)}
+      if(size == 1){pdf_file = sub("archv.tif", "ccc_surface_100w.pdf",fixfile)}
+      if(size == 2){pdf_file = sub("archv.tif", "ccc_surface_200w.pdf",fixfile)}
+      if(size == 3){pdf_file = sub("archv.tif", "ccc_surface_275w.pdf",fixfile)}
       unlink(pdf_file) #delete the pdf if it exists
       pdf(file=pdf_file, width=10, heigh=7) #size of the pdf page
       par(mfrow=c(2,3)) #number of trajectories to place on a page (columns, rows)
@@ -417,7 +448,6 @@ l1g2l1t_warp = function(reffile, fixfile, mode){
       x = y = seq(1,ncol(nccm),1)
       
       good = which(values(ncc) == maxValue(ncc))[1] 
-      #good = good[1]
       
       ####
       xoffsetcoord = xFromCell(ncc, good)
@@ -429,9 +459,8 @@ l1g2l1t_warp = function(reffile, fixfile, mode){
       ####
       
       #get the row and column numbers for the fix image
-      origfiximg_x = info[point,"fixx"]
-      origfiximg_y = info[point,"fixy"]
-      #a = cellFromXY(origfiximg, c(info[point,"refx"],info[point,"refy"])) #fiximg
+      origfiximg_x = info[point,"fixx"]-shiftit[1]
+      origfiximg_y = info[point,"fixy"]-shiftit[2]
       a = cellFromXY(origfiximg, c(origfiximg_x,origfiximg_y))
       fiximgrc = rowColFromCell(origfiximg, a)
       info[point,"fixcol"] = fiximgrc[2] #info[point,8] = fiximgrc[2]
@@ -491,7 +520,7 @@ l1g2l1t_warp = function(reffile, fixfile, mode){
   
   #write all the point info to a file
   if(mode != "rmse"){
-    info_file = sub("archv_l1g_warp.tif", "info_full.csv",fixfile)
+    info_file = sub("archv.tif", "info_full.csv",fixfile)
     write.csv(info, file=info_file, row.names = F) 
   }
   
@@ -510,7 +539,7 @@ l1g2l1t_warp = function(reffile, fixfile, mode){
       dname = dirname(fixfile)
       newdname = paste(dname,"_NO_L1G2L1T", sep="")
       file.rename(dname,newdname)
-      outfile = file.path(newdname,sub("archv_l1g_warp.tif", "no_l1g2l1t.txt",basename(fixfile)))
+      outfile = file.path(newdname,sub("archv.tif", "no_l1g2l1t.txt",basename(fixfile)))
       write("cant find enought points", outfile)
     } else{
       save(rmse_info, file = rmse_outfile)
@@ -550,7 +579,7 @@ l1g2l1t_warp = function(reffile, fixfile, mode){
       dname = dirname(fixfile)
       newdname = paste(dname,"_NO_L1G2L1T", sep="")
       file.rename(dname,newdname)
-      outfile = sub("archv_l1g_warp.tif", "no_l1g2l1t.txt",fixfile)
+      outfile = sub("archv.tif", "no_l1g2l1t.txt",fixfile)
       write("cant find enought points", outfile)
     } else{
       rmse_info$info = info
@@ -573,67 +602,51 @@ l1g2l1t_warp = function(reffile, fixfile, mode){
     return()
   }
   
-  
   #write out the filtered points that will be used in the transformation
-  info_file = sub("archv_l1g_warp.tif", "info_sub.csv",fixfile)
+  info_file = sub("archv.tif", "info_sub.csv",fixfile)
   write.csv(info, file=info_file, row.names = F)
   
-  
-  
-  
-  
-  
   #make some output file names
-  tempname = sub("archv_l1g_warp", "temp", fixfile) #"K:/scenes/034032/images/1976/LM10360321976248_archv_l1g_warp.tif"
-  outfile = sub("archv_l1g_warp.tif", "archv_l1g2l1t.tif", fixfile)
-  wktfile = sub("archv_l1g_warp.tif","wkt.txt", fixfile)
-  gcpfile = sub("archv_l1g_warp.tif", "gcp.txt", fixfile)
+  tempname = sub("archv.tif", "temp.tif", fixfile) #"K:/scenes/034032/images/1976/LM10360321976248_archv_l1g_warp.tif"
+  outfile = sub("archv.tif", "archv_l1g2l1t.tif", fixfile)
+  wktfile = sub("archv.tif","wkt.txt", fixfile)
+  #gcpfile = sub("archv.tif", "gcp.txt", fixfile)
+  gdaltransoptsfile = sub("archv.tif", "gdal_trans_opts.txt", fixfile)
   
-  #write out a project file for gdal translate to use
-  projcmd = paste("gdalsrsinfo -o wkt", fixfile)
-  proj = system(projcmd, intern = TRUE)
+  #write out a projection file for gdal translate to use
+  proj = system(paste("gdalsrsinfo -o wkt", fixfile), intern = TRUE)
   write(proj, wktfile)
   
-  #get the initial gcp string made
-  gdaltrans_cmd = make_gdaltrans_cmd(info, wktfile, fixfile, tempname)
+  #create the warp cmd and save as a file
+  gdaltrans_opts = make_gdaltrans_opts(info, wktfile, fixfile, tempname)
+  write(gdaltrans_opts, file=gdaltransoptsfile)
   
-  #make sure that the gcpstr command is small enough to make it through the command prompt
-  nchar_gcpstr = nchar(gdaltrans_cmd)
-  counter = 1
-  subsamp = F
-  while(nchar_gcpstr > 8191){
-    if(counter == 1){subsamp = T}
-    subinfo = info[sample(1:nrow(info),(nrow(info)-counter)),]
-    gdaltrans_cmd = make_gdaltrans_cmd(subinfo, wktfile, fixfile, tempname)
-    nchar_gcpstr = nchar(gdaltrans_cmd)
-    counter = counter + 1
-  }
-  
-  #write out subset sample if the subset was sampled
-  if(subsamp == T){
-    info_sub_file_ = sub("archv_l1g_warp.tif", "info_sub_samp.csv",fixfile)
-    write.csv(subinfo, file=info_sub_file_, row.names = F)
-  }
-  
-  #write out the gcp metadata file
-  write(gdaltrans_cmd, file=gcpfile) #, append=T)
-  
-  #gdal translate command
-  #gdaltrans_cmd = paste("gdal_translate -of Gtiff -ot Byte -co INTERLEAVE=BAND -a_srs", wktfile, fixfile, tempname, gcpstr)
-  system(gdaltrans_cmd)
+  #run the warp command file
+  cmd = paste("gdal_translate --optfile", gdaltransoptsfile)
+  system(cmd)
   
   #gdal warp command
   gdalwarp_cmd = paste("gdalwarp -of Gtiff -tps -ot Byte -srcnodata 0 -dstnodata 0 -co INTERLEAVE=BAND -overwrite -multi -tr", reso, reso, tempname, outfile) #fixfile   "-tps"  "-order 2", "-order 3" 
   system(gdalwarp_cmd)
   
+  
+  # ######################## warping method tests#####################################################
+  # outfiletest = sub("archv.tif", "archv_l1g2l1t_test_tps.tif", fixfile)
+  # gdalwarp_cmd = paste("gdalwarp -of Gtiff -tps -ot Byte -srcnodata 0 -dstnodata 0 -co INTERLEAVE=BAND -overwrite -multi -tr", reso, reso, tempname, outfiletest) #fixfile   "-tps"  "-order 2", "-order 3" 
+  # system(gdalwarp_cmd)
+  # 
+  # outfiletest = sub("archv.tif", "archv_l1g2l1t_test_order1.tif", fixfile)
+  # gdalwarp_cmd = paste("gdalwarp -of Gtiff -order 1 -ot Byte -srcnodata 0 -dstnodata 0 -co INTERLEAVE=BAND -overwrite -multi -tr", reso, reso, tempname, outfiletest) #fixfile   "-tps"  "-order 2", "-order 3" 
+  # system(gdalwarp_cmd)
+  # 
+  # outfiletest = sub("archv.tif", "archv_l1g2l1t_test_order2.tif", fixfile)
+  # gdalwarp_cmd = paste("gdalwarp -of Gtiff -order 2 -ot Byte -srcnodata 0 -dstnodata 0 -co INTERLEAVE=BAND -overwrite -multi -tr", reso, reso, tempname, outfiletest) #fixfile   "-tps"  "-order 2", "-order 3" 
+  # system(gdalwarp_cmd)
+  # ##################################################################################################
+  
+  
   #delete the temp file
   unlink(list.files(dirname(fixfile), pattern = "temp", full.names = T))
 }
 
-
-#for testing
-#reffile = "J:/l1g_warp/test/refimg/LM50450301985132AAA04/LM50450301985132_archv.tif"
-#fixfile = "J:/l1g_warp/test/LM50450301985132_archv_l1g_warp.tif"
-#shift(brick(reffile), x=360, y=360, format = "GTiff", filename=fixfile, datatype = "INT1U", options=c("COMPRESS=NONE"))
-#l1g2l1t_warp(reffile, fixfile)
 
