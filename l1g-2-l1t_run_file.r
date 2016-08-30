@@ -26,7 +26,7 @@ l1g2l1t_unpack(file, proj)
 
 
 
-# prepare L1G-2-L1T Initializer app images --------------------------------
+# Prepare L1G-2-L1T initializer app images --------------------------------
 
 reffile = "J:/l1g2l1t_test/wrs1_012028/refimg/LM20120281977191GMD04/LM20120281977191_archv.tif" #full path to an MSS L1T reference *archv.tif file
 fixdir =  "J:/l1g2l1t_test/wrs1_012028/fiximg" #full direcory path of L1G image outputs from the MSS unpacker function - must correspond to the wrs and path/row of the reference image
@@ -47,15 +47,24 @@ run_prepare_tie_point_images(reffile, fixdir, outdir)
 
 
 
-# run the warping procedure -----------------------------------------------
+# Run the warping procedure -----------------------------------------------
 
 tpfile = "J:/l1g2l1t_test/wrs1_012028/wrs1_012028_tie_points.json" #define the full path to the tie-point file that was downloaded from the MSS L1G-2-L1T Initializer app
+method = "tps" #select a method to warp the L1G images - the options are: "tps" (thin plate spline), "order 1" (first order polynomial), or "order 2" (second order polynomial)
 
 #######################################################################################
-run_l1g2l1t_warp(tpfile) #run the wapring script script - it will loop through all images included in the tie-point file
+run_l1g2l1t_warp(tpfile, method="tps") #run the wapring script script - it will loop through all images included in the tie-point file
 #######################################################################################
 
 
 
+
+# Check RMSE --------------------------------------------------------------
+
+rmse_file = "J:/l1g2l1t_test/wrs1_012028/fiximg/LM10120281976224PAC08/LM10120281976224_rmse.Rdata" #for a single image define the path its "*_rmse.Rdata" file
+
+#######################################################################################
+print_rmse(rmse_file)
+#######################################################################################
 
 
