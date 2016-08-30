@@ -150,22 +150,22 @@
 				<div id="l1g2l1tBodyModal" class="modal-body" style="overflow-y:scroll font-size:12px">
 					<h5><strong>MSS L1G-2-L1T Initializer is a manual image-to-image tie point identification tool to give the automated tie point finder a hint about where to start.</strong></h5>
 					<p>
-						It displays a reference image and an image to be warped side-by-side. The goal is to identify at least 3 spatially coincident 
-						points for each image set. This gives the automated image-to-image tie point identification script a place to start.
+						It displays a reference image and an image to be warped side-by-side. The goal is to identify 1 spatially coincident 
+						point for each image set. This gives the automated image-to-image tie point identification script a place to start.
 					</p>
 					<p>
 						Use the mouse wheel to zoom in and out of the images. Find a location that is easily identified and well-defined in each image. Zoom into the images
 						so they are pixelated and try to identify roughly the same pixel between the images (within a pixel or two). Double click on the selected pixel to insert a point, 
-						do the same in the other image. Once both points have been placed, the point will disappear. Add at least two more point sets. The application tool-bar will
-						tell you how many point sets you have identified. Once you have found enough points, press the <em>Next Image</em> button
+						do the same in the other image. Once both points have been placed, the point will disappear. The application tool-bar will
+						tell you how many point sets you have identified. Once you have found a point, press the <em>Next Image</em> button
 					</p>					
 					<p>
-						If the image to be fixed is completely cloudy, has many bad lines, or coincident points between it and the reference image cannot be found, press the <em>Skip</em>
+						If the image to be fixed is completely cloudy, has many bad lines, or a coincident point between it and the reference image cannot be found, press the <em>Skip</em>
 						button to release a drop-down menu from which to choose the reason for skipping. If another image to be fixed is in the queue, it will load after your selection
 						is made.
 					</p>
 					<p>
-						Once you have completed identifying a set of initializing tie-points for each image, the <em>Download Tie Points</em> button will turn green and become active.
+						Once you have completed identifying an initializing tie-point for each image, the <em>Download Tie Points</em> button will turn green and become active.
 						Press the button to download a text file (.json) that contains all of the information you just collected. Save the file to a location you will remember.
 						The file location will be set as a variable in the automated image-to-image tie point script.
 					</p>
