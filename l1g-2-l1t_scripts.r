@@ -231,11 +231,11 @@ run_prepare_tie_point_images = function(reffile, fixdir, outdir){
   prepare_tie_point_images(reffile, fixfiles, outdir)
 }
 
-run_l1g2l1t_warp = function(tpfile){
+run_l1g2l1t_warp = function(tpfile, method){
   data = fromJSON(file = tpfile)
   len = length(data)
   for(i in 1:len){
-    print(paste("working on file: ",i,"/",len,sep=""))
+    cat(paste("Working on file: ",i,"/",len,sep=""),"\n")
     d = data[[i]]
     fixFile = d$fix$file
     if(d$process == 0){
@@ -256,16 +256,20 @@ run_l1g2l1t_warp = function(tpfile){
     
     refstart=c(refX,refY)
     fixstart=c(fixX,fixY)
-    l1g2l1t_warp(d$ref$file, d$fix$file, refstart, fixstart, mode="warp")
+    cat("Running tie pointer finder to warp image","\n")
+    result = l1g2l1t_warp(reffile=d$ref$file, fixfile=d$fix$file, refstart=refstart, fixstart=fixstart, mode="warp", method=method)
+    if(result != 0){
+      cat("Running tie pointer finder to calculate RMSE","\n")
+      result = l1g2l1t_warp(reffile=d$ref$file, fixfile=result, refstart=c(0,0), fixstart=c(0,0), mode="rmse", method=method)
+    }
   }
 }
 
 
-
-
-
-
-l1g2l1t_warp = function(reffile, fixfile, refstart=c(0,0), fixstart=c(0,0), mode){
+l1g2l1t_warp = function(reffile, fixfile, refstart=c(0,0), fixstart=c(0,0), mode, method){
+  #mode can be: "rmse" or "warp"
+  #method can be: "tps" or "order 1" or "order 2"
+  
   
   #set default parameters
   search=35 #27 
@@ -370,7 +374,7 @@ l1g2l1t_warp = function(reffile, fixfile, refstart=c(0,0), fixstart=c(0,0), mode
   
   #subset the sample
   n_samp = length(b)
-  print(paste("n points from original sample:",n_samp))
+  cat(paste("n points from original sample:",n_samp),"\n")
   n_subsamp = 1000
   if(n_samp < n_subsamp){n_subsamp = n_samp}
   subsamp = sample(b, n_subsamp)
@@ -386,7 +390,7 @@ l1g2l1t_warp = function(reffile, fixfile, refstart=c(0,0), fixstart=c(0,0), mode
   #iterate process of creating a similarity surface for each check point in the sample
   window_size = c(101,201,275)
   for(size in 1:3){
-    print(paste("working on window size set: ",size,"/3",sep=""))
+    cat(paste("Working on window size set: ",size,"/3",sep=""),"\n")
     if(mode != "rmse"){
       if(size == 1){pdf_file = sub("archv.tif", "ccc_surface_100w.pdf",fixfile)}
       if(size == 2){pdf_file = sub("archv.tif", "ccc_surface_200w.pdf",fixfile)}
@@ -436,7 +440,7 @@ l1g2l1t_warp = function(reffile, fixfile, refstart=c(0,0), fixstart=c(0,0), mode
       tofix = matrix(values(fixsub),ncol=window,byrow = T)
       
       if(length(tofix) %% 2 == 0) {
-        print("skipping")
+        cat("Skipping","\n")
         next
       }
       
@@ -528,7 +532,7 @@ l1g2l1t_warp = function(reffile, fixfile, refstart=c(0,0), fixstart=c(0,0), mode
         persp(x, y, ccc, theta = 30, phi = 30, expand = 0.5, col = 8, main=title)
       }
     }
-    print(paste("n goods =",length(which(info[,"decision"] == 1))))
+    cat(paste("n goods =",length(which(info[,"decision"] == 1))),"\n")
     if(mode != "rmse"){
       dev.off() #turn off the plotting device
     }
@@ -561,7 +565,7 @@ l1g2l1t_warp = function(reffile, fixfile, refstart=c(0,0), fixstart=c(0,0), mode
     } else{
       save(rmse_info, file = rmse_outfile)
     }
-    return()
+    return(0)
   }
 
   
@@ -577,8 +581,8 @@ l1g2l1t_warp = function(reffile, fixfile, refstart=c(0,0), fixstart=c(0,0), mode
     goods = which(r <= limit)
     n_outliers = nrow(info)-length(goods)
     info = info[goods,]
-    print(paste("getting rid of:",n_outliers,"outliers"))
-    print(paste("there are still:",nrow(info),"points"))
+    cat(paste("Getting rid of:",n_outliers,"outliers"),"\n")
+    cat(paste("There are still:",nrow(info),"points"),"\n")
     #maxr = endit = 10
     #while(maxr >2 & endit != 0){
     #  rmse = calc_rmse(info,reso)
@@ -602,7 +606,7 @@ l1g2l1t_warp = function(reffile, fixfile, refstart=c(0,0), fixstart=c(0,0), mode
       rmse_info$info = info
       save(rmse_info, file = rmse_outfile)
     }
-    return()
+    return(0)
   }
   
   #if this is an rmse run, then save the info and get out
@@ -616,7 +620,7 @@ l1g2l1t_warp = function(reffile, fixfile, refstart=c(0,0), fixstart=c(0,0), mode
     rmse_info$info=info
     
     save(rmse_info, file=rmse_outfile)
-    return()
+    return(0)
   }
   
   #write out the filtered points that will be used in the transformation
@@ -643,7 +647,7 @@ l1g2l1t_warp = function(reffile, fixfile, refstart=c(0,0), fixstart=c(0,0), mode
   system(cmd)
   
   #gdal warp command
-  gdalwarp_cmd = paste("gdalwarp -of Gtiff -tps -ot Byte -srcnodata 0 -dstnodata 0 -co INTERLEAVE=BAND -overwrite -multi -tr", reso, reso, tempname, outfile) #fixfile   "-tps"  "-order 2", "-order 3" 
+  gdalwarp_cmd = paste("gdalwarp -of Gtiff", paste("-", method, sep=""), "-ot Byte -srcnodata 0 -dstnodata 0 -co INTERLEAVE=BAND -overwrite -multi -tr", reso, reso, tempname, outfile) #fixfile   "-tps"  "-order 2", "-order 3" 
   system(gdalwarp_cmd)
   
   
@@ -664,6 +668,37 @@ l1g2l1t_warp = function(reffile, fixfile, refstart=c(0,0), fixstart=c(0,0), mode
   
   #delete the temp file
   unlink(list.files(dirname(fixfile), pattern = "temp", full.names = T))
+  return(outfile)
+}
+
+print_rmse = function(rmse_file){
+  calc_rmse = function(info,reso){
+    xresid = (info[,"refx"]-info[,"fixx"])^2 #get the residuals of each x
+    yresid = (info[,"refy"]-info[,"fixy"])^2 #get the residuals of each y
+    r = (sqrt(xresid+yresid))/reso #get the rmse of each xy point
+    x_rmse = sqrt(mean(xresid))/reso
+    y_rmse = sqrt(mean(yresid))/reso
+    total_rmse = sqrt((x_rmse^2)+(y_rmse^2)) #total rmse including all points
+    rmse_info = list(x_rmse=x_rmse, y_rmse=y_rmse, total_rmse=total_rmse, r=r)
+    return(rmse_info)
+  }
+  
+  load(rmse_file)
+  info = rmse_info$info
+  rmse = calc_rmse(info,60)
+  r = rmse$r
+  sdr = sd(r)
+  meanr = mean(r)
+  limit = meanr+sdr*2
+  goods = which(r <= limit)
+  n_outliers = nrow(info)-length(goods)
+  info = info[goods,]
+  
+  rmse = calc_rmse(info,60)
+  
+  cat("X RMSE:",rmse$x_rmse, "pixels", "\n")
+  cat("Y RMSE:",rmse$y_rmse, "pixels", "\n")
+  cat("Total RMSE:",rmse$total_rmse, "pixels", "\n")
 }
 
 
